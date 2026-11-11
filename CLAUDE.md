@@ -2,7 +2,7 @@
 
 ## What this project is
 
-Projekt prostej gry terminalowej w stylu Asteroids. Ma za zadanie nauke podstaw programowania oraz AI native workflow.
+Projekt prostej gry w stylu Asteroids. Ma za zadanie nauke podstaw programowania oraz AI native workflow.
 
 ## Stack and tools
 
@@ -18,7 +18,7 @@ source .venv/bin/activate
 ## Code conventions
 
 Korzystanie z venv.
-Nazwy zmiennych w stylu kebab-case
+Nazwy zmiennych w stylu snake_case
 
 ## Constraints (guardrails)
 
