@@ -10,6 +10,11 @@ Python 3.13
 Pygames 2.6.1
 uv package manager
 
+## Commands
+
+uv venv
+source .venv/bin/activate
+
 ## Code conventions
 
 Korzystanie z venv.
