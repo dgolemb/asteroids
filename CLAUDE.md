@@ -1,0 +1,21 @@
+# Asteroids - projekt szkoleniowy
+
+## What this project is
+
+Projekt prostej gry terminalowej w stylu Asteroids. Ma za zadanie nauke podstaw programowania oraz AI native workflow.
+
+## Stack and tools
+
+Python 3.13
+Pygames 2.6.1
+uv package manager
+
+## Code conventions
+
+Korzystanie z venv.
+Nazwy zmiennych w stylu kebab-case
+
+## Constraints (guardrails)
+
+Nie commituj prosto do main.
+Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie poprosze.
