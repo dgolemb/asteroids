@@ -5,6 +5,9 @@ from constants import (
     LINE_WIDTH,
     PLAYER_TURN_SPEED,
     PLAYER_SPEED,
+    PLAYER_ACCELERATION,
+    PLAYER_DECELERATION,
+    PLAYER_BRAKE_DECELERATION,
     PLAYER_SHOT_SPEED,
     PLAYER_SHOOT_COOLDOWN_SECONDS,
     PLAYER_RESPAWN_INVULNERABILITY_SECONDS,
@@ -15,10 +18,17 @@ from constants import (
 from shot import Shot
 
 
+def move_toward_zero(value: float, step: float) -> float:
+    if value > 0:
+        return max(0.0, value - step)
+    return min(0.0, value + step)
+
+
 class Player(CircleShape):
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.speed = 0.0
         self.shoot_timer = 0
         self.invulnerable_timer = 0
 
@@ -29,6 +39,7 @@ class Player(CircleShape):
         self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
+        self.speed = 0.0
         self.invulnerable_timer = PLAYER_RESPAWN_INVULNERABILITY_SECONDS
 
     def triangle(self) -> list[pygame.Vector2]:
@@ -47,11 +58,19 @@ class Player(CircleShape):
     def rotate(self, dt: float) -> None:
         self.rotation += PLAYER_TURN_SPEED * dt
 
+    def apply_thrust(self, direction: int, dt: float) -> None:
+        if direction == 0:
+            self.speed = move_toward_zero(self.speed, PLAYER_DECELERATION * dt)
+        elif self.speed * direction < 0:
+            self.speed = move_toward_zero(self.speed, PLAYER_BRAKE_DECELERATION * dt)
+        else:
+            self.speed += direction * PLAYER_ACCELERATION * dt
+            self.speed = max(-PLAYER_SPEED, min(PLAYER_SPEED, self.speed))
+
     def move(self, dt: float) -> None:
-        unit_vector = pygame.Vector2(0, 1)
-        rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
-        self.position += rotated_with_speed_vector
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        self.velocity = forward * self.speed
+        self.position += self.velocity * dt
 
     def shoot(self) -> None:
         if self.is_invulnerable():
@@ -72,10 +91,13 @@ class Player(CircleShape):
             self.rotate(-dt)
         if keys[pygame.K_d]:
             self.rotate(dt)
+        direction = 0
         if keys[pygame.K_w]:
-            self.move(dt)
+            direction += 1
         if keys[pygame.K_s]:
-            self.move(-dt)
+            direction -= 1
+        self.apply_thrust(direction, dt)
+        self.move(dt)
         if keys[pygame.K_SPACE]:
             self.shoot()
 
