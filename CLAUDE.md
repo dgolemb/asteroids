@@ -30,3 +30,4 @@ Nie uzywaj emoji.
 ## Rules
 
 Korzystaj z venv.
+Gdy nie jesteś pewien, zadawaj pytania zamiast zgadywać.
