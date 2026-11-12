@@ -1,1 +1,0 @@
-Korzystaj z venv
