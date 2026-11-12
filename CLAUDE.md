@@ -18,6 +18,7 @@ source .venv/bin/activate
 ## Code conventions
 
 Nazwy zmiennych w stylu snake_case
+Nazwy klas w stylu PascalCase
 
 ## Constraints (guardrails)
 
