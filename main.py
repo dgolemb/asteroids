@@ -42,11 +42,14 @@ def main():
                 return
         updatable.update(dt)
         for asteroid in asteroids:
-            if asteroid.collides_with(player):
+            if not player.is_invulnerable() and asteroid.collides_with(player):
                 log_event("player_hit")
-                print("Game over!")
-                print(f"Final score: {hud.score}")
-                sys.exit()
+                hud.lose_life()
+                if hud.is_game_over():
+                    print("Game over!")
+                    print(f"Final score: {hud.score}")
+                    sys.exit()
+                player.respawn()
             for shot in shots:
                 if shot.collides_with(asteroid):
                     points = asteroid.get_score()
