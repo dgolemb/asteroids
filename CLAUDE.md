@@ -23,6 +23,8 @@ Nazwy zmiennych w stylu snake_case
 
 Nie commituj prosto do main.
 Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie poprosze.
+Nie komentuj kodu jeśli o to nie poproszę.
+Nie uzywaj emoji.
 
 ## Rules
 
