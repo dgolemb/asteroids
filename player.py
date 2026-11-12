@@ -1,6 +1,17 @@
 import pygame
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS
+from constants import (
+    PLAYER_RADIUS,
+    LINE_WIDTH,
+    PLAYER_TURN_SPEED,
+    PLAYER_SPEED,
+    PLAYER_SHOT_SPEED,
+    PLAYER_SHOOT_COOLDOWN_SECONDS,
+    PLAYER_RESPAWN_INVULNERABILITY_SECONDS,
+    PLAYER_BLINK_INTERVAL_SECONDS,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+)
 from shot import Shot
 
 
@@ -9,6 +20,16 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shoot_timer = 0
+        self.invulnerable_timer = 0
+
+    def is_invulnerable(self) -> bool:
+        return self.invulnerable_timer > 0
+
+    def respawn(self) -> None:
+        self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.rotation = 0
+        self.velocity = pygame.Vector2(0, 0)
+        self.invulnerable_timer = PLAYER_RESPAWN_INVULNERABILITY_SECONDS
 
     def triangle(self) -> list[pygame.Vector2]:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -19,6 +40,8 @@ class Player(CircleShape):
         return [a, b, c]
 
     def draw(self, screen: pygame.Surface) -> None:
+        if self.is_invulnerable() and int(self.invulnerable_timer / PLAYER_BLINK_INTERVAL_SECONDS) % 2 == 1:
+            return
         pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
 
     def rotate(self, dt: float) -> None:
@@ -31,6 +54,8 @@ class Player(CircleShape):
         self.position += rotated_with_speed_vector
 
     def shoot(self) -> None:
+        if self.is_invulnerable():
+            return
         if self.shoot_timer > 0:
             return
         else:
@@ -40,6 +65,7 @@ class Player(CircleShape):
 
     def update(self, dt: float) -> None:
         self.shoot_timer -= dt
+        self.invulnerable_timer = max(0, self.invulnerable_timer - dt)
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
