@@ -13,6 +13,7 @@ from constants import (
     EXPLOSION_PARTICLE_LIFETIME_MAX_SECONDS,
     EXPLOSION_PARTICLE_SPEED_MIN,
     EXPLOSION_PARTICLE_SPEED_MAX,
+    EXPLOSION_SPREAD_SCALE_PER_KIND,
 )
 
 
@@ -33,9 +34,11 @@ class Asteroid(CircleShape):
     def explode(self) -> None:
         log_event("asteroid_explosion")
         count = random.randint(EXPLOSION_PARTICLE_COUNT_MIN, EXPLOSION_PARTICLE_COUNT_MAX)
+        kind = round(self.radius / ASTEROID_MIN_RADIUS)
+        spread_scale = 1 + (kind - 1) * EXPLOSION_SPREAD_SCALE_PER_KIND
         for i in range(count):
             angle = i * 360 / count
-            speed = random.uniform(EXPLOSION_PARTICLE_SPEED_MIN, EXPLOSION_PARTICLE_SPEED_MAX)
+            speed = random.uniform(EXPLOSION_PARTICLE_SPEED_MIN, EXPLOSION_PARTICLE_SPEED_MAX) * spread_scale
             velocity = pygame.Vector2(0, 1).rotate(angle) * speed
             lifetime = random.uniform(
                 EXPLOSION_PARTICLE_LIFETIME_MIN_SECONDS,
