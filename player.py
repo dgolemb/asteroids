@@ -53,7 +53,9 @@ class Player(CircleShape):
     def draw(self, screen: pygame.Surface) -> None:
         if self.is_invulnerable() and int(self.invulnerable_timer / PLAYER_BLINK_INTERVAL_SECONDS) % 2 == 1:
             return
-        pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+        points = self.triangle()
+        for offset in self.ghost_offsets(self.radius * 1.5):
+            pygame.draw.polygon(screen, "white", [p + offset for p in points], LINE_WIDTH)
 
     def rotate(self, dt: float) -> None:
         self.rotation += PLAYER_TURN_SPEED * dt
