@@ -30,8 +30,21 @@ class Asteroid(CircleShape):
         kind = round(self.radius / ASTEROID_MIN_RADIUS)
         return ASTEROID_SCORES.get(kind, 0)
 
+    def explode(self) -> None:
+        log_event("asteroid_explosion")
+        count = random.randint(EXPLOSION_PARTICLE_COUNT_MIN, EXPLOSION_PARTICLE_COUNT_MAX)
+        for i in range(count):
+            angle = i * 360 / count
+            speed = random.uniform(EXPLOSION_PARTICLE_SPEED_MIN, EXPLOSION_PARTICLE_SPEED_MAX)
+            velocity = pygame.Vector2(0, 1).rotate(angle) * speed
+            lifetime = random.uniform(
+                EXPLOSION_PARTICLE_LIFETIME_MIN_SECONDS,
+                EXPLOSION_PARTICLE_LIFETIME_MAX_SECONDS,
+            )
+            ExplosionParticle(self.position.x, self.position.y, velocity, lifetime)
+
     def split(self) -> None:
-        spawn_explosion(self.position)
+        self.explode()
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
