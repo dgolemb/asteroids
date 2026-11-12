@@ -2,8 +2,18 @@ import pygame
 import random
 from logger import log_event
 from circleshape import CircleShape
-from explosion import spawn_explosion
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_SCORES
+from explosion import ExplosionParticle
+from constants import (
+    LINE_WIDTH,
+    ASTEROID_MIN_RADIUS,
+    ASTEROID_SCORES,
+    EXPLOSION_PARTICLE_COUNT_MIN,
+    EXPLOSION_PARTICLE_COUNT_MAX,
+    EXPLOSION_PARTICLE_LIFETIME_MIN_SECONDS,
+    EXPLOSION_PARTICLE_LIFETIME_MAX_SECONDS,
+    EXPLOSION_PARTICLE_SPEED_MIN,
+    EXPLOSION_PARTICLE_SPEED_MAX,
+)
 
 
 class Asteroid(CircleShape):
