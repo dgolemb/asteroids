@@ -17,7 +17,6 @@ source .venv/bin/activate
 
 ## Code conventions
 
-Korzystanie z venv.
 Nazwy zmiennych w stylu snake_case
 
 ## Constraints (guardrails)
