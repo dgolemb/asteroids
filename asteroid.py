@@ -2,6 +2,7 @@ import pygame
 import random
 from logger import log_event
 from circleshape import CircleShape
+from explosion import spawn_explosion
 from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_SCORES
 
 
@@ -20,6 +21,7 @@ class Asteroid(CircleShape):
         return ASTEROID_SCORES.get(kind, 0)
 
     def split(self) -> None:
+        spawn_explosion(self.position)
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
