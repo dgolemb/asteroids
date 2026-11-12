@@ -73,6 +73,7 @@ class Player(CircleShape):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.velocity = forward * self.speed
         self.position += self.velocity * dt
+        self.wrap_position()
 
     def shoot(self) -> None:
         if self.is_invulnerable():
