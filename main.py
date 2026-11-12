@@ -2,7 +2,7 @@ import pygame
 from constants import *
 from logger import log_state
 from player import Player
-from asteroids import Asteroid
+from asteroid import Asteroid
 
 def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
