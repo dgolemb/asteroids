@@ -22,10 +22,12 @@ class Asteroid(CircleShape):
         super().__init__(x, y, radius)
 
     def draw(self, screen: pygame.Surface) -> None:
-        pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
+        for offset in self.ghost_offsets():
+            pygame.draw.circle(screen, "white", self.position + offset, self.radius, LINE_WIDTH)
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt
+        self.wrap_position()
 
     def get_score(self) -> int:
         kind = round(self.radius / ASTEROID_MIN_RADIUS)
