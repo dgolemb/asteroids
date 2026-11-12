@@ -45,6 +45,8 @@ class AsteroidField(pygame.sprite.Sprite):
         self.spawn_timer += dt
         if self.spawn_timer > ASTEROID_SPAWN_RATE_SECONDS:
             self.spawn_timer = 0
+            if len(self.asteroids) >= ASTEROID_MAX_COUNT:
+                return
 
             # spawn a new asteroid at a random edge
             edge = random.choice(self.edges)
