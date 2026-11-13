@@ -31,3 +31,4 @@ Nie uzywaj emoji.
 
 Korzystaj z venv.
 Gdy nie jesteś pewien, zadawaj pytania zamiast zgadywać.
+Po kazdym zatwierdzonym i wykonanym Edit, commituj do aktualnego brancha z krótkim (1-2 zdania) opisem wprowadzonych zmian.
