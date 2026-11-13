@@ -1,5 +1,5 @@
-resource_group_name  = "<resource-group-name>"
-storage_account_name = "<storage-account-name>"
-container_name       = "<container-name>"
+resource_group_name  = "rg-AI-native-asteroids-training"
+storage_account_name = "terraformasteroids"
+container_name       = "tfstate"
 key                  = "asteroids.tfstate"
 use_azuread_auth     = true
