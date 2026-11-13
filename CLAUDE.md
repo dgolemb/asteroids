@@ -38,6 +38,7 @@ Nie commituj prosto do main.
 Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie poprosze.
 Nie komentuj kodu jeśli o to nie poproszę.
 Nie uzywaj emoji.
+Nie pisz dokumentacji jesli nie zostaniesz o to bezposrednio poproszony.
 
 ## Rules
 
