@@ -5,7 +5,6 @@ from logger import log_event
 from circleshape import CircleShape
 from explosion import ExplosionParticle
 from constants import (
-    LINE_WIDTH,
     ASTEROID_MIN_RADIUS,
     ASTEROID_SCORES,
     EXPLOSION_PARTICLE_COUNT_MIN,
@@ -43,7 +42,6 @@ class Asteroid(CircleShape):
         for offset in self.ghost_offsets():
             center = self.position + offset
             screen.blit(rotated, rotated.get_rect(center=(round(center.x), round(center.y))))
-            pygame.draw.circle(screen, "white", center, self.radius, LINE_WIDTH)
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt
