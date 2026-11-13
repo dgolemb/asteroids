@@ -30,11 +30,9 @@ class Asteroid(CircleShape):
 
     def create_textured_surface(self) -> pygame.Surface:
         size = ceil(self.radius * 2)
-        texture_width, texture_height = self.texture.get_size()
-        offset_x = random.randint(0, max(0, texture_width - size))
-        offset_y = random.randint(0, max(0, texture_height - size))
+        scaled = pygame.transform.smoothscale(self.texture, (size, size))
         surface = pygame.Surface((size, size), pygame.SRCALPHA)
-        surface.blit(self.texture, (0, 0), pygame.Rect(offset_x, offset_y, size, size))
+        surface.blit(scaled, (0, 0))
         mask = pygame.Surface((size, size), pygame.SRCALPHA)
         pygame.draw.circle(mask, (255, 255, 255, 255), (size / 2, size / 2), self.radius)
         surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
