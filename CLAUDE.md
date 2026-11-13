@@ -19,6 +19,9 @@ Runtime w przeglądarce:
 CPython 3.12
 pygame-ce 2.5.7
 
+Infra:
+Terraform 1.15.6
+
 ## Commands
 
 uv venv
