@@ -1,6 +1,6 @@
 import pygame
 import random
-from math import ceil
+from math import ceil, sqrt
 from logger import log_event
 from circleshape import CircleShape
 from explosion import ExplosionParticle
@@ -42,6 +42,12 @@ class Asteroid(CircleShape):
         for offset in self.ghost_offsets():
             center = self.position + offset
             screen.blit(rotated, rotated.get_rect(center=(round(center.x), round(center.y))))
+
+    def bounding_radius(self) -> float:
+        return self.radius * sqrt(2)
+
+    def get_mask(self) -> pygame.Mask:
+        return pygame.mask.from_surface(pygame.transform.rotate(self.image, self.rotation))
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt

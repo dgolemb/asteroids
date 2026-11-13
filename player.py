@@ -1,4 +1,5 @@
 import pygame
+from math import ceil
 from circleshape import CircleShape
 from constants import (
     PLAYER_RADIUS,
@@ -49,6 +50,17 @@ class Player(CircleShape):
         b = self.position - forward * self.radius - right
         c = self.position - forward * self.radius + right
         return [a, b, c]
+
+    def bounding_radius(self) -> float:
+        return self.radius * 1.5
+
+    def get_mask(self) -> pygame.Mask:
+        size = ceil(self.bounding_radius() * 2)
+        center = pygame.Vector2(size / 2, size / 2)
+        surface = pygame.Surface((size, size), pygame.SRCALPHA)
+        points = [p - self.position + center for p in self.triangle()]
+        pygame.draw.polygon(surface, (255, 255, 255, 255), points)
+        return pygame.mask.from_surface(surface)
 
     def draw(self, screen: pygame.Surface) -> None:
         if self.is_invulnerable() and int(self.invulnerable_timer / PLAYER_BLINK_INTERVAL_SECONDS) % 2 == 1:
