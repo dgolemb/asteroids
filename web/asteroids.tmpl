@@ -14,7 +14,6 @@ Loading {{cookiecutter.title}} from {{cookiecutter.archive}}.apk
 
 """)
 
-import os
 import sys
 import asyncio
 import platform
@@ -23,7 +22,6 @@ from pathlib import Path
 
 # do not rename
 async def custom_site():
-    os.environ["PYGPI"] = f"{platform.window.location.origin}/cdn/"
     import embed
     platform.document.body.style.background = "#7f7f7f"
 
@@ -379,6 +377,10 @@ frameborder="1"
     }
 
     async function custom_onload(debug_hidden) {
+        const orig_argv = Module.PyConfig.orig_argv
+        if (!orig_argv.some(arg => arg.startsWith("PYGPI=")))
+            orig_argv.unshift("PYGPI=" + location.origin + "/cdn/")
+
         // this is called before anything python is loaded
         // make your js customization here
         console.log(__FILE__, "custom_onload")
