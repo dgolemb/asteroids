@@ -1,6 +1,6 @@
 import pygame
 from math import ceil
-from circleshape import CircleShape
+from shape import Shape
 from constants import (
     PLAYER_RADIUS,
     LINE_WIDTH,
@@ -25,7 +25,7 @@ def move_toward_zero(value: float, step: float) -> float:
     return min(0.0, value + step)
 
 
-class Player(CircleShape):
+class Player(Shape):
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0

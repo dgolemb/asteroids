@@ -4,7 +4,7 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 # Base class for game objects
-class CircleShape(pygame.sprite.Sprite):
+class Shape(pygame.sprite.Sprite):
     containers: tuple[pygame.sprite.Group, ...]
 
     def __init__(self, x: float, y: float, radius: float) -> None:
@@ -54,12 +54,12 @@ class CircleShape(pygame.sprite.Sprite):
         pygame.draw.circle(surface, (255, 255, 255, 255), (size / 2, size / 2), self.radius)
         return pygame.mask.from_surface(surface)
 
-    def wrapped_delta(self, other: "CircleShape") -> pygame.Vector2:
+    def wrapped_delta(self, other: "Shape") -> pygame.Vector2:
         dx = (other.position.x - self.position.x + SCREEN_WIDTH / 2) % SCREEN_WIDTH - SCREEN_WIDTH / 2
         dy = (other.position.y - self.position.y + SCREEN_HEIGHT / 2) % SCREEN_HEIGHT - SCREEN_HEIGHT / 2
         return pygame.Vector2(dx, dy)
 
-    def collides_with(self, other: "CircleShape") -> bool:
+    def collides_with(self, other: "Shape") -> bool:
         delta = self.wrapped_delta(other)
         if delta.length() > self.bounding_radius() + other.bounding_radius():
             return False

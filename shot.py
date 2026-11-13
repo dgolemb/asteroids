@@ -1,9 +1,9 @@
 import pygame
-from circleshape import CircleShape
+from shape import Shape
 from constants import LINE_WIDTH, SHOT_RADIUS, SCREEN_WIDTH, SCREEN_HEIGHT
 
 
-class Shot(CircleShape):
+class Shot(Shape):
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, SHOT_RADIUS)
 

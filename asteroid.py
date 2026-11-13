@@ -2,7 +2,7 @@ import pygame
 import random
 from math import ceil, sqrt
 from logger import log_event
-from circleshape import CircleShape
+from shape import Shape
 from explosion import ExplosionParticle
 from constants import (
     ASTEROID_MIN_RADIUS,
@@ -18,7 +18,7 @@ from constants import (
 )
 
 
-class Asteroid(CircleShape):
+class Asteroid(Shape):
     texture: pygame.Surface
 
     def __init__(self, x: float, y: float, radius: float) -> None:
