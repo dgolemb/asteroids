@@ -8,7 +8,12 @@ Projekt prostej gry w stylu Asteroids. Ma za zadanie nauke podstaw programowania
 
 Python 3.13
 Pygames 2.6.1
-uv package manager
+uv 0.13.8
+pygbag 0.9.2
+
+Obrazy bazowe Docker:
+python:3.13-slim
+nginx:1.27-alpine
 
 ## Commands
 
