@@ -10,6 +10,7 @@ wheels/
 # Virtual environments
 .venv
 
+
 # Logger
 game_state.jsonl
 game_events.jsonl
@@ -20,3 +21,4 @@ infra/.terraform/
 *.tfvars
 *.tfplan
 crash.log
+infra/env.sh
