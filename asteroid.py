@@ -1,5 +1,6 @@
 import pygame
 import random
+from math import ceil
 from logger import log_event
 from circleshape import CircleShape
 from explosion import ExplosionParticle
@@ -14,19 +15,41 @@ from constants import (
     EXPLOSION_PARTICLE_SPEED_MIN,
     EXPLOSION_PARTICLE_SPEED_MAX,
     EXPLOSION_SPREAD_SCALE_PER_KIND,
+    ASTEROID_ROTATION_SPEED_MAX,
 )
 
 
 class Asteroid(CircleShape):
+    texture: pygame.Surface
+
     def __init__(self, x: float, y: float, radius: float) -> None:
         super().__init__(x, y, radius)
+        self.rotation = random.uniform(0, 360)
+        self.rotation_speed = random.uniform(-ASTEROID_ROTATION_SPEED_MAX, ASTEROID_ROTATION_SPEED_MAX)
+        self.image = self.create_textured_surface()
+
+    def create_textured_surface(self) -> pygame.Surface:
+        size = ceil(self.radius * 2)
+        texture_width, texture_height = self.texture.get_size()
+        offset_x = random.randint(0, max(0, texture_width - size))
+        offset_y = random.randint(0, max(0, texture_height - size))
+        surface = pygame.Surface((size, size), pygame.SRCALPHA)
+        surface.blit(self.texture, (0, 0), pygame.Rect(offset_x, offset_y, size, size))
+        mask = pygame.Surface((size, size), pygame.SRCALPHA)
+        pygame.draw.circle(mask, (255, 255, 255, 255), (size / 2, size / 2), self.radius)
+        surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+        return surface
 
     def draw(self, screen: pygame.Surface) -> None:
+        rotated = pygame.transform.rotate(self.image, self.rotation)
         for offset in self.ghost_offsets():
-            pygame.draw.circle(screen, "white", self.position + offset, self.radius, LINE_WIDTH)
+            center = self.position + offset
+            screen.blit(rotated, rotated.get_rect(center=(round(center.x), round(center.y))))
+            pygame.draw.circle(screen, "white", center, self.radius, LINE_WIDTH)
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt
+        self.rotation = (self.rotation + self.rotation_speed * dt) % 360
         self.wrap_position()
 
     def get_score(self) -> int:

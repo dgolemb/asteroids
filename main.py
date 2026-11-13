@@ -32,6 +32,7 @@ def main():
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     background = load_background()
+    Asteroid.texture = pygame.image.load(ASTEROID_TEXTURE_PATH).convert()
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
