@@ -13,3 +13,10 @@ wheels/
 # Logger
 game_state.jsonl
 game_events.jsonl
+# Terraform
+infra/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+crash.log
