@@ -1,5 +1,6 @@
 import pygame
 import sys
+from math import ceil
 from constants import *
 from logger import log_state, log_event
 from player import Player
@@ -8,6 +9,16 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from hud import Hud
 from explosion import ExplosionParticle
+
+
+def load_background():
+    image = pygame.image.load(BACKGROUND_IMAGE_PATH).convert()
+    width, height = image.get_size()
+    scale = max(SCREEN_WIDTH / width, SCREEN_HEIGHT / height)
+    scaled = pygame.transform.smoothscale(image, (ceil(width * scale), ceil(height * scale)))
+    rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    rect.center = scaled.get_rect().center
+    return scaled.subsurface(rect)
 
 
 def main():
@@ -20,6 +31,7 @@ def main():
     dt = 0.0
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    background = load_background()
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -60,7 +72,7 @@ def main():
                     shot.kill()
                     asteroid.split()
                     break
-        screen.fill("black")
+        screen.blit(background, (0, 0))
         for object in drawable:
             object.draw(screen)
         hud.draw(screen)
