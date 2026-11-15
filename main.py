@@ -1,6 +1,5 @@
 import asyncio
 import pygame
-from math import ceil
 from constants import *
 from logger import log_state, log_event
 from player import Player
@@ -12,13 +11,13 @@ from explosion import ExplosionParticle
 
 
 def load_background():
-    image = pygame.image.load(BACKGROUND_IMAGE_PATH).convert()
-    width, height = image.get_size()
-    scale = max(SCREEN_WIDTH / width, SCREEN_HEIGHT / height)
-    scaled = pygame.transform.smoothscale(image, (ceil(width * scale), ceil(height * scale)))
-    rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-    rect.center = scaled.get_rect().center
-    return scaled.subsurface(rect)
+    tile = pygame.image.load(BACKGROUND_IMAGE_PATH).convert()
+    tile_width, tile_height = tile.get_size()
+    background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    for y in range(0, SCREEN_HEIGHT, tile_height):
+        for x in range(0, SCREEN_WIDTH, tile_width):
+            background.blit(tile, (x, y))
+    return background
 
 
 async def main():
