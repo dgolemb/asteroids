@@ -20,6 +20,12 @@ def load_background():
     return background
 
 
+def load_sprite(path, scale):
+    image = pygame.image.load(path).convert_alpha()
+    width, height = image.get_size()
+    return pygame.transform.smoothscale(image, (round(width * scale), round(height * scale)))
+
+
 async def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
@@ -33,6 +39,8 @@ async def main():
     background = load_background()
     Asteroid.texture = pygame.image.load(ASTEROID_TEXTURE_PATH).convert()
     Asteroid.generate_shapes()
+    Player.texture = load_sprite(PLAYER_TEXTURE_PATH, PLAYER_TEXTURE_SCALE)
+    Shot.texture = load_sprite(SHOT_TEXTURE_PATH, SHOT_TEXTURE_SCALE)
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()

@@ -1,9 +1,7 @@
 import pygame
-from math import ceil
 from shape import Shape
 from constants import (
     PLAYER_RADIUS,
-    LINE_WIDTH,
     PLAYER_TURN_SPEED,
     PLAYER_SPEED,
     PLAYER_ACCELERATION,
@@ -26,6 +24,8 @@ def move_toward_zero(value: float, step: float) -> float:
 
 
 class Player(Shape):
+    texture: pygame.Surface
+
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
@@ -43,31 +43,22 @@ class Player(Shape):
         self.speed = 0.0
         self.invulnerable_timer = PLAYER_RESPAWN_INVULNERABILITY_SECONDS
 
-    def triangle(self) -> list[pygame.Vector2]:
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
-        a = self.position + forward * self.radius
-        b = self.position - forward * self.radius - right
-        c = self.position - forward * self.radius + right
-        return [a, b, c]
+    def rotated_image(self) -> pygame.Surface:
+        return pygame.transform.rotate(self.texture, 180 - self.rotation)
 
     def bounding_radius(self) -> float:
         return self.radius * 1.5
 
     def get_mask(self) -> pygame.Mask:
-        size = ceil(self.bounding_radius() * 2)
-        center = pygame.Vector2(size / 2, size / 2)
-        surface = pygame.Surface((size, size), pygame.SRCALPHA)
-        points = [p - self.position + center for p in self.triangle()]
-        pygame.draw.polygon(surface, (255, 255, 255, 255), points)
-        return pygame.mask.from_surface(surface)
+        return pygame.mask.from_surface(self.rotated_image())
 
     def draw(self, screen: pygame.Surface) -> None:
         if self.is_invulnerable() and int(self.invulnerable_timer / PLAYER_BLINK_INTERVAL_SECONDS) % 2 == 1:
             return
-        points = self.triangle()
-        for offset in self.ghost_offsets(self.radius * 1.5):
-            pygame.draw.polygon(screen, "white", [p + offset for p in points], LINE_WIDTH)
+        rotated = self.rotated_image()
+        for offset in self.ghost_offsets(self.bounding_radius()):
+            center = self.position + offset
+            screen.blit(rotated, rotated.get_rect(center=(round(center.x), round(center.y))))
 
     def rotate(self, dt: float) -> None:
         self.rotation += PLAYER_TURN_SPEED * dt
