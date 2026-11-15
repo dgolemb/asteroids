@@ -76,7 +76,7 @@ async def main():
                 player.respawn()
             for shot in shots:
                 if shot.collides_with(asteroid):
-                    points = asteroid.get_score()
+                    points = round(asteroid.get_score() * asteroid_field.score_multiplier())
                     log_event("asteroid_shot", score=points)
                     hud.add_score(points)
                     shot.kill()

@@ -44,6 +44,9 @@ class AsteroidField(pygame.sprite.Sprite):
     def speed_multiplier(self) -> float:
         return 1 + (self.level - 1) * DIFFICULTY_SPEED_INCREASE_PER_LEVEL
 
+    def score_multiplier(self) -> float:
+        return 1 + (self.level - 1) * DIFFICULTY_SCORE_INCREASE_PER_LEVEL
+
     def spawn_interval(self) -> float:
         return ASTEROID_SPAWN_RATE_SECONDS * DIFFICULTY_SPAWN_INTERVAL_FACTOR_PER_LEVEL ** (self.level - 1)
 
