@@ -15,6 +15,7 @@ from constants import (
     SHIELD_RADIUS,
     SHIELD_LINE_WIDTH,
     SHIELD_COLOR,
+    SHIELD_BLINK_SECONDS,
     SHIELD_BLINK_INTERVAL_SECONDS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -60,7 +61,8 @@ class Player(Shape):
     def draw_shield(self, screen: pygame.Surface) -> None:
         if not self.shield_active():
             return
-        if int(self.active_effects[SHIELD_KIND] / SHIELD_BLINK_INTERVAL_SECONDS) % 2 == 1:
+        time_left = self.active_effects[SHIELD_KIND]
+        if time_left <= SHIELD_BLINK_SECONDS and int(time_left / SHIELD_BLINK_INTERVAL_SECONDS) % 2 == 1:
             return
         for offset in self.ghost_offsets(SHIELD_RADIUS):
             center = self.position + offset
