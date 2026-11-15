@@ -39,6 +39,7 @@ Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie popro
 Nie komentuj kodu jeśli o to nie poproszę.
 Nie uzywaj emoji.
 Nie pisz dokumentacji jesli nie zostaniesz o to bezposrednio poproszony.
+Nie dodawaj informacji Co-Authored-By do commitow.
 
 ## Rules
 
