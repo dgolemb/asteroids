@@ -11,6 +11,11 @@ from constants import (
     PLAYER_SHOOT_COOLDOWN_SECONDS,
     PLAYER_RESPAWN_INVULNERABILITY_SECONDS,
     PLAYER_BLINK_INTERVAL_SECONDS,
+    SHIELD_KIND,
+    SHIELD_RADIUS,
+    SHIELD_LINE_WIDTH,
+    SHIELD_COLOR,
+    SHIELD_BLINK_INTERVAL_SECONDS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
 )
@@ -32,9 +37,40 @@ class Player(Shape):
         self.speed = 0.0
         self.shoot_timer = 0
         self.invulnerable_timer = 0
+        self.active_effects: dict[str, float] = {}
 
     def is_invulnerable(self) -> bool:
         return self.invulnerable_timer > 0
+
+    def add_effect(self, kind: str, duration: float) -> None:
+        self.active_effects[kind] = duration
+
+    def has_effect(self, kind: str) -> bool:
+        return self.active_effects.get(kind, 0) > 0
+
+    def update_effects(self, dt: float) -> None:
+        for kind in list(self.active_effects):
+            self.active_effects[kind] -= dt
+            if self.active_effects[kind] <= 0:
+                del self.active_effects[kind]
+
+    def shield_active(self) -> bool:
+        return self.has_effect(SHIELD_KIND)
+
+    def draw_shield(self, screen: pygame.Surface) -> None:
+        if not self.shield_active():
+            return
+        if int(self.active_effects[SHIELD_KIND] / SHIELD_BLINK_INTERVAL_SECONDS) % 2 == 1:
+            return
+        for offset in self.ghost_offsets(SHIELD_RADIUS):
+            center = self.position + offset
+            pygame.draw.circle(
+                screen,
+                SHIELD_COLOR,
+                (round(center.x), round(center.y)),
+                SHIELD_RADIUS,
+                SHIELD_LINE_WIDTH,
+            )
 
     def respawn(self) -> None:
         self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -91,6 +127,7 @@ class Player(Shape):
     def update(self, dt: float) -> None:
         self.shoot_timer -= dt
         self.invulnerable_timer = max(0, self.invulnerable_timer - dt)
+        self.update_effects(dt)
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:

@@ -8,6 +8,8 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from hud import Hud
 from explosion import ExplosionParticle
+from powerup import Powerup
+from powerupspawner import PowerupSpawner
 
 
 def load_background():
@@ -26,6 +28,23 @@ def load_sprite(path, scale):
     return pygame.transform.smoothscale(image, (round(width * scale), round(height * scale)))
 
 
+def destroy_asteroid(asteroid, asteroid_field, hud, source):
+    points = round(asteroid.get_score() * asteroid_field.score_multiplier())
+    log_event(source, score=points)
+    hud.add_score(points)
+    asteroid.split()
+
+
+def shield_hits(player, asteroid):
+    return player.wrapped_delta(asteroid).length() <= SHIELD_RADIUS + asteroid.radius
+
+
+def load_pixel_sprite(path, scale):
+    image = pygame.image.load(path).convert_alpha()
+    width, height = image.get_size()
+    return pygame.transform.scale(image, (width * scale, height * scale))
+
+
 async def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
@@ -41,20 +60,25 @@ async def main():
     Asteroid.generate_shapes()
     Player.texture = load_sprite(PLAYER_TEXTURE_PATH, PLAYER_TEXTURE_SCALE)
     Shot.texture = load_sprite(SHOT_TEXTURE_PATH, SHOT_TEXTURE_SCALE)
+    Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    powerups = pygame.sprite.Group()
 
     Player.containers = (updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable)
     Shot.containers = (shots, updatable, drawable)
     ExplosionParticle.containers = (updatable, drawable)
+    Powerup.containers = (powerups, updatable)
+    PowerupSpawner.containers = (updatable)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField(asteroids)
+    powerup_spawner = PowerupSpawner(powerups, player)
     hud = Hud()
 
 
@@ -65,7 +89,15 @@ async def main():
                 return
         updatable.update(dt)
         hud.level = asteroid_field.level
+        for powerup in powerups:
+            if powerup.collides_with(player):
+                log_event("powerup_picked", kind=powerup.kind)
+                player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
+                powerup.kill()
         for asteroid in asteroids:
+            if player.shield_active() and shield_hits(player, asteroid):
+                destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shielded")
+                continue
             if not player.is_invulnerable() and asteroid.collides_with(player):
                 log_event("player_hit")
                 hud.lose_life()
@@ -76,15 +108,15 @@ async def main():
                 player.respawn()
             for shot in shots:
                 if shot.collides_with(asteroid):
-                    points = round(asteroid.get_score() * asteroid_field.score_multiplier())
-                    log_event("asteroid_shot", score=points)
-                    hud.add_score(points)
                     shot.kill()
-                    asteroid.split()
+                    destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shot")
                     break
         screen.blit(background, (0, 0))
+        for powerup in powerups:
+            powerup.draw(screen)
         for object in drawable:
             object.draw(screen)
+        player.draw_shield(screen)
         hud.draw(screen)
         pygame.display.flip()
         dt = clock.tick(60) / 1000
