@@ -47,6 +47,12 @@ class AsteroidField(pygame.sprite.Sprite):
     def spawn_interval(self) -> float:
         return ASTEROID_SPAWN_RATE_SECONDS * DIFFICULTY_SPAWN_INTERVAL_FACTOR_PER_LEVEL ** (self.level - 1)
 
+    def max_count(self) -> int:
+        return min(
+            ASTEROID_MAX_COUNT,
+            ASTEROID_START_MAX_COUNT + (self.level - 1) * ASTEROID_MAX_COUNT_INCREASE_PER_LEVEL,
+        )
+
     def spawn(
         self, radius: float, position: pygame.Vector2, velocity: pygame.Vector2
     ) -> None:
@@ -63,7 +69,7 @@ class AsteroidField(pygame.sprite.Sprite):
         self.spawn_timer += dt
         if self.spawn_timer > self.spawn_interval():
             self.spawn_timer = 0
-            if len(self.asteroids) >= ASTEROID_MAX_COUNT:
+            if len(self.asteroids) >= self.max_count():
                 return
 
             # spawn a new asteroid at a random edge
