@@ -64,6 +64,7 @@ async def main():
             if event.type == pygame.QUIT:
                 return
         updatable.update(dt)
+        hud.level = asteroid_field.level
         for asteroid in asteroids:
             if not player.is_invulnerable() and asteroid.collides_with(player):
                 log_event("player_hit")

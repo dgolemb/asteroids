@@ -7,6 +7,7 @@ class Hud:
         self.font = pygame.font.Font(None, HUD_FONT_SIZE)
         self.score = 0
         self.lives = PLAYER_START_LIVES
+        self.level = 1
 
     def add_score(self, points: int) -> None:
         self.score += points
@@ -18,7 +19,7 @@ class Hud:
         return self.lives <= 0
 
     def get_lines(self) -> list[str]:
-        return [f"SCORE: {self.score}", f"LIVES: {self.lives}"]
+        return [f"SCORE: {self.score}", f"LIVES: {self.lives}", f"LEVEL: {self.level}"]
 
     def draw(self, screen: pygame.Surface) -> None:
         y = HUD_MARGIN
