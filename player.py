@@ -17,6 +17,10 @@ from constants import (
     SHIELD_COLOR,
     SHIELD_BLINK_SECONDS,
     SHIELD_BLINK_INTERVAL_SECONDS,
+    WEAPON_KIND,
+    WEAPON_DURATION_SECONDS,
+    WEAPON_MAX_LEVEL,
+    WEAPON_FIRE_RATE_BONUS_PER_LEVEL,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
 )
@@ -39,6 +43,7 @@ class Player(Shape):
         self.shoot_timer = 0
         self.invulnerable_timer = 0
         self.active_effects: dict[str, float] = {}
+        self.weapon_level = 0
 
     def is_invulnerable(self) -> bool:
         return self.invulnerable_timer > 0
@@ -49,11 +54,24 @@ class Player(Shape):
     def has_effect(self, kind: str) -> bool:
         return self.active_effects.get(kind, 0) > 0
 
+    def upgrade_weapon(self) -> None:
+        self.weapon_level = min(self.weapon_level + 1, WEAPON_MAX_LEVEL)
+        self.add_effect(WEAPON_KIND, WEAPON_DURATION_SECONDS)
+
+    def reset_weapon(self) -> None:
+        self.weapon_level = 0
+        self.active_effects.pop(WEAPON_KIND, None)
+
+    def shoot_cooldown(self) -> float:
+        return PLAYER_SHOOT_COOLDOWN_SECONDS / (1 + WEAPON_FIRE_RATE_BONUS_PER_LEVEL * self.weapon_level)
+
     def update_effects(self, dt: float) -> None:
         for kind in list(self.active_effects):
             self.active_effects[kind] -= dt
             if self.active_effects[kind] <= 0:
                 del self.active_effects[kind]
+                if kind == WEAPON_KIND:
+                    self.weapon_level = 0
 
     def shield_active(self) -> bool:
         return self.has_effect(SHIELD_KIND)
@@ -80,6 +98,7 @@ class Player(Shape):
         self.velocity = pygame.Vector2(0, 0)
         self.speed = 0.0
         self.invulnerable_timer = PLAYER_RESPAWN_INVULNERABILITY_SECONDS
+        self.reset_weapon()
 
     def rotated_image(self) -> pygame.Surface:
         return pygame.transform.rotate(self.texture, 180 - self.rotation)
@@ -122,8 +141,8 @@ class Player(Shape):
         if self.shoot_timer > 0:
             return
         else:
-            self.shoot_timer = PLAYER_SHOOT_COOLDOWN_SECONDS
-        shot = Shot(self.position.x, self.position.y)
+            self.shoot_timer = self.shoot_cooldown()
+        shot = Shot(self.position.x, self.position.y, self.weapon_level)
         shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
 
     def update(self, dt: float) -> None:
