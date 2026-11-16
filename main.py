@@ -12,6 +12,7 @@ from explosion import ExplosionParticle
 from powerup import Powerup
 from powerupspawner import PowerupSpawner
 from stats import GameStats
+from touch import TouchBridge
 
 
 def load_background():
@@ -95,6 +96,8 @@ async def main():
     updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats = new_game()
 
     menu = Menu()
+    bridge = TouchBridge.create()
+    Player.touch = bridge
     state = GameState.MENU
     final_score = 0
 
@@ -107,6 +110,22 @@ async def main():
                     print("\n".join(stats.summary_lines()))
                 return
         pressed_keys = [event.key for event in events if event.type == pygame.KEYDOWN]
+
+        bridge.poll()
+        menu.touch_mode = bridge.available
+        if bridge.tap is not None:
+            if state in (GameState.MENU, GameState.GAME_OVER):
+                pressed_keys.append(pygame.K_RETURN)
+            elif state == GameState.PLAYING and menu.is_pause_button_hit(bridge.tap):
+                pressed_keys.append(pygame.K_ESCAPE)
+            elif state == GameState.PAUSED:
+                option_index = menu.pause_option_at(bridge.tap)
+                if option_index is not None:
+                    menu.set_selection(option_index)
+                    pressed_keys.append(pygame.K_RETURN)
+        if bridge.blocked and state == GameState.PLAYING:
+            menu.reset_selection()
+            state = GameState.PAUSED
 
         if state == GameState.MENU:
             menu.update(dt)
@@ -180,6 +199,8 @@ async def main():
                 object.draw(screen)
             player.draw_shield(screen)
             hud.draw(screen)
+            if bridge.available and state == GameState.PLAYING:
+                menu.draw_pause_button(screen)
             if state == GameState.PAUSED:
                 menu.draw_pause_menu(screen)
         pygame.display.flip()
