@@ -101,6 +101,8 @@ async def main():
 
         if state == GameState.MENU:
             menu.update(dt)
+            if pygame.K_ESCAPE in pressed_keys:
+                return
             if pygame.K_RETURN in pressed_keys:
                 updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
                 state = GameState.PLAYING

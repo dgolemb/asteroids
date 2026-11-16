@@ -64,7 +64,9 @@ class Menu:
         if self.is_blink_visible():
             screen.blit(title_surface, title_rect)
         subtitle_y = title_rect.bottom + MENU_LINE_SPACING + MENU_SUBTITLE_FONT_SIZE / 2
-        self.draw_centered(screen, self.subtitle_font, "Press ENTER to start.", MENU_TEXT_COLOR, subtitle_y)
+        start_rect = self.draw_centered(screen, self.subtitle_font, "Press ENTER to start.", MENU_TEXT_COLOR, subtitle_y)
+        exit_y = start_rect.bottom + MENU_LINE_SPACING / 2 + MENU_SUBTITLE_FONT_SIZE / 2
+        self.draw_centered(screen, self.subtitle_font, "Press ESC to exit.", MENU_TEXT_COLOR, exit_y)
 
     def draw_pause_menu(self, screen: pygame.Surface) -> None:
         screen.blit(self.overlay, (0, 0))
