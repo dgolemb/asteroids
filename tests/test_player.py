@@ -60,14 +60,10 @@ class SteerTowardTest(unittest.TestCase):
         player.steer_toward(target, DT)
         self.assertLess(player.rotation, -170)
 
-    def test_returns_remaining_misalignment(self):
+    def test_stays_put_when_already_aligned(self):
         player = new_player()
-        remaining = player.steer_toward(pygame.Vector2(1, 0), DT)
-        self.assertAlmostEqual(remaining, 90 - PLAYER_TURN_SPEED * DT)
-
-    def test_returns_zero_when_already_aligned(self):
-        player = new_player()
-        self.assertAlmostEqual(player.steer_toward(pygame.Vector2(0, 1), DT), 0.0)
+        player.steer_toward(pygame.Vector2(0, 1), DT)
+        self.assertAlmostEqual(player.rotation, 0.0)
 
 
 class TouchThrustTest(unittest.TestCase):
@@ -82,31 +78,29 @@ class TouchThrustTest(unittest.TestCase):
         self.update_with(player, (0, 1), 300)
         self.assertAlmostEqual(player.speed, PLAYER_SPEED)
 
-    def test_half_deflection_reaches_half_speed(self):
+    def test_light_deflection_also_reaches_max_speed(self):
         player = new_player()
-        self.update_with(player, (0, 0.5), 300)
-        self.assertAlmostEqual(player.speed, PLAYER_SPEED * 0.5)
-
-    def test_speed_above_target_comes_down_to_target(self):
-        player = new_player()
-        player.speed = PLAYER_SPEED
-        self.update_with(player, (0, 0.25), 300)
-        self.assertAlmostEqual(player.speed, PLAYER_SPEED * 0.25)
+        self.update_with(player, (0, 0.1), 300)
+        self.assertAlmostEqual(player.speed, PLAYER_SPEED)
 
     def test_acceleration_uses_player_acceleration(self):
         player = new_player()
         self.update_with(player, (0, 1), 1)
         self.assertAlmostEqual(player.speed, PLAYER_ACCELERATION * DT)
 
-    def test_no_thrust_while_nose_is_far_from_the_vector(self):
+    def test_thrust_starts_immediately_while_the_nose_is_still_turning(self):
         player = new_player()
         self.update_with(player, (0, -1), 1)
-        self.assertEqual(player.speed, 0.0)
+        self.assertAlmostEqual(player.speed, PLAYER_ACCELERATION * DT)
+        self.assertAlmostEqual(abs(player.rotation), PLAYER_TURN_SPEED * DT)
 
-    def test_thrust_starts_once_the_nose_is_close_enough(self):
+    def test_nose_catches_up_with_the_vector_while_thrusting(self):
         player = new_player()
-        self.update_with(player, (0, -1), 60)
-        self.assertGreater(player.speed, 0.0)
+        self.update_with(player, (1, 0), 120)
+        nose = pygame.Vector2(0, 1).rotate(player.rotation)
+        self.assertAlmostEqual(nose.x, 1.0, places=5)
+        self.assertAlmostEqual(nose.y, 0.0, places=5)
+        self.assertAlmostEqual(player.speed, PLAYER_SPEED)
 
     def test_released_stick_lets_the_ship_coast_down(self):
         player = new_player()

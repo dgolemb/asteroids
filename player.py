@@ -22,7 +22,6 @@ from constants import (
     WEAPON_MAX_LEVEL,
     WEAPON_FIRE_RATE_BONUS_PER_LEVEL,
     WEAPON_EXTRA_BEAMS,
-    TOUCH_THRUST_ALIGNMENT_DEGREES,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
 )
@@ -140,26 +139,15 @@ class Player(Shape):
             self.speed += direction * PLAYER_ACCELERATION * dt
             self.speed = max(-PLAYER_SPEED, min(PLAYER_SPEED, self.speed))
 
-    def steer_toward(self, vector: pygame.Vector2, dt: float) -> float:
+    def steer_toward(self, vector: pygame.Vector2, dt: float) -> None:
         target = pygame.Vector2(0, 1).angle_to(vector)
         difference = (target - self.rotation + 180) % 360 - 180
         step = PLAYER_TURN_SPEED * dt
-        applied = max(-step, min(step, difference))
-        self.rotation += applied
-        return abs(difference - applied)
-
-    def approach_speed(self, target: float, dt: float) -> None:
-        if self.speed < target:
-            self.speed = min(target, self.speed + PLAYER_ACCELERATION * dt)
-        else:
-            self.speed = max(target, self.speed - PLAYER_DECELERATION * dt)
+        self.rotation += max(-step, min(step, difference))
 
     def apply_touch_thrust(self, vector: pygame.Vector2, dt: float) -> None:
-        misalignment = self.steer_toward(vector, dt)
-        if misalignment < TOUCH_THRUST_ALIGNMENT_DEGREES:
-            self.approach_speed(PLAYER_SPEED * vector.length(), dt)
-        else:
-            self.apply_thrust(0, dt)
+        self.steer_toward(vector, dt)
+        self.apply_thrust(1, dt)
 
     def move(self, dt: float) -> None:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
