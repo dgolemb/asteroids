@@ -11,6 +11,7 @@ from menu import Menu, GameState
 from explosion import ExplosionParticle
 from powerup import Powerup
 from powerupspawner import PowerupSpawner
+from stats import GameStats
 
 
 def load_background():
@@ -29,10 +30,11 @@ def load_sprite(path, scale):
     return pygame.transform.smoothscale(image, (round(width * scale), round(height * scale)))
 
 
-def destroy_asteroid(asteroid, asteroid_field, hud, source):
+def destroy_asteroid(asteroid, asteroid_field, hud, stats, source):
     points = round(asteroid.get_score() * asteroid_field.score_multiplier())
     log_event(source, score=points)
     hud.add_score(points)
+    stats.record_asteroid(round(asteroid.radius / ASTEROID_MIN_RADIUS))
     asteroid.split()
 
 
@@ -65,7 +67,8 @@ def new_game():
     asteroid_field = AsteroidField(asteroids)
     PowerupSpawner(powerups, player)
     hud = Hud()
-    return updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud
+    stats = GameStats()
+    return updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats
 
 
 async def main():
@@ -89,7 +92,7 @@ async def main():
     Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
     Powerup.textures[WEAPON_KIND] = load_pixel_sprite(POWERUP_WEAPON_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
 
-    updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
+    updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats = new_game()
 
     menu = Menu()
     state = GameState.MENU
@@ -100,6 +103,8 @@ async def main():
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
+                if state in (GameState.PLAYING, GameState.PAUSED):
+                    print("\n".join(stats.summary_lines()))
                 return
         pressed_keys = [event.key for event in events if event.type == pygame.KEYDOWN]
 
@@ -108,7 +113,7 @@ async def main():
             if pygame.K_ESCAPE in pressed_keys:
                 return
             if pygame.K_RETURN in pressed_keys:
-                updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
+                updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats = new_game()
                 state = GameState.PLAYING
         elif state == GameState.GAME_OVER:
             if pygame.K_RETURN in pressed_keys:
@@ -134,9 +139,12 @@ async def main():
         else:
             updatable.update(dt)
             hud.level = asteroid_field.level
+            stats.add_time(dt)
+            stats.set_level(asteroid_field.level)
             for powerup in powerups:
                 if powerup.collides_with(player):
                     log_event("powerup_picked", kind=powerup.kind)
+                    stats.record_powerup(powerup.kind)
                     if powerup.kind == WEAPON_KIND:
                         player.upgrade_weapon()
                     else:
@@ -144,7 +152,7 @@ async def main():
                     powerup.kill()
             for asteroid in asteroids:
                 if player.shield_active() and shield_hits(player, asteroid):
-                    destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shielded")
+                    destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shielded")
                     continue
                 if not player.is_invulnerable() and asteroid.collides_with(player):
                     log_event("player_hit")
@@ -157,14 +165,14 @@ async def main():
                 for shot in shots:
                     if shot.collides_with(asteroid):
                         shot.kill()
-                        destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shot")
+                        destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shot")
                         break
 
         screen.blit(background, (0, 0))
         if state == GameState.MENU:
             menu.draw_title_screen(screen)
         elif state == GameState.GAME_OVER:
-            menu.draw_game_over(screen, final_score)
+            menu.draw_game_over(screen, final_score, stats.summary_lines())
         else:
             for powerup in powerups:
                 powerup.draw(screen)

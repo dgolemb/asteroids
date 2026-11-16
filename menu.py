@@ -77,10 +77,14 @@ class Menu:
             self.draw_centered(screen, self.option_font, option, color, y)
             y += MENU_OPTION_FONT_SIZE + MENU_LINE_SPACING
 
-    def draw_game_over(self, screen: pygame.Surface, score: int) -> None:
-        center_y = SCREEN_HEIGHT / 2
+    def draw_game_over(self, screen: pygame.Surface, score: int, stat_lines: list[str]) -> None:
+        center_y = SCREEN_HEIGHT / 3
         score_rect = self.draw_centered(screen, self.title_font, f"Final score: {score}", MENU_SELECTED_COLOR, center_y)
-        thanks_y = score_rect.bottom + MENU_LINE_SPACING + MENU_OPTION_FONT_SIZE / 2
+        bottom = score_rect.bottom
+        for line in stat_lines:
+            line_y = bottom + MENU_LINE_SPACING / 2 + MENU_SUBTITLE_FONT_SIZE / 2
+            bottom = self.draw_centered(screen, self.subtitle_font, line, MENU_TEXT_COLOR, line_y).bottom
+        thanks_y = bottom + MENU_LINE_SPACING + MENU_OPTION_FONT_SIZE / 2
         thanks_rect = self.draw_centered(screen, self.option_font, "Thanks for playing!", MENU_SELECTED_COLOR, thanks_y)
         hint_y = thanks_rect.bottom + MENU_LINE_SPACING + MENU_SUBTITLE_FONT_SIZE / 2
         self.draw_centered(screen, self.subtitle_font, "Press ENTER to continue.", MENU_TEXT_COLOR, hint_y)
