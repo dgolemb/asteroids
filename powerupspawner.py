@@ -7,6 +7,7 @@ from constants import (
     POWERUP_SPAWN_MIN_SECONDS,
     POWERUP_SPAWN_MAX_SECONDS,
     POWERUP_SPAWN_ATTEMPTS,
+    WEAPON_KIND,
 )
 from powerup import Powerup
 
@@ -30,7 +31,7 @@ class PowerupSpawner(pygame.sprite.Sprite):
         return [
             kind
             for kind in Powerup.textures
-            if kind not in present and not self.player.has_effect(kind)
+            if kind not in present and (kind == WEAPON_KIND or not self.player.has_effect(kind))
         ]
 
     def random_position(self) -> pygame.Vector2 | None:

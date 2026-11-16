@@ -87,6 +87,7 @@ async def main():
         for level in range(WEAPON_MAX_LEVEL + 1)
     ]
     Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
+    Powerup.textures[WEAPON_KIND] = load_pixel_sprite(POWERUP_WEAPON_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
 
     updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
 
@@ -136,7 +137,10 @@ async def main():
             for powerup in powerups:
                 if powerup.collides_with(player):
                     log_event("powerup_picked", kind=powerup.kind)
-                    player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
+                    if powerup.kind == WEAPON_KIND:
+                        player.upgrade_weapon()
+                    else:
+                        player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
                     powerup.kill()
             for asteroid in asteroids:
                 if player.shield_active() and shield_hits(player, asteroid):
