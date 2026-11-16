@@ -23,12 +23,25 @@
         return;
     }
 
-    root.classList.add("touch", "immersive");
+    root.classList.add("touch");
+
+    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+    const fullscreenOverlay = createOverlay("fullscreen-overlay", "Tap to enter fullscreen");
+    let fullscreenTried = false;
 
     let stickId = null;
     const origin = { x: 0, y: 0 };
     const pending = new Map();
     let resizeTimer = 0;
+
+    function createOverlay(id, text) {
+        const element = document.createElement("div");
+        element.id = id;
+        element.className = "mobile-overlay";
+        element.textContent = text;
+        document.body.appendChild(element);
+        return element;
+    }
 
     function toGameSpace(clientX, clientY) {
         const canvas = document.getElementById("canvas");
@@ -132,6 +145,44 @@
         resizeTimer = setTimeout(resizeGame, RESIZE_DEBOUNCE_MILLISECONDS);
     }
 
+    function inFullscreen() {
+        return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    function evaluate() {
+        const needsFullscreen = Boolean(requestFullscreen) && !inFullscreen() && !fullscreenTried;
+        root.classList.toggle("needs-fullscreen", needsFullscreen);
+        root.classList.toggle("immersive", !needsFullscreen);
+        state.blocked = needsFullscreen;
+        if (state.blocked) {
+            resetStick();
+            pending.clear();
+        }
+        scheduleResize();
+    }
+
+    async function attempt(action) {
+        try {
+            await action();
+        } catch (error) {
+            return false;
+        }
+        return true;
+    }
+
+    async function enterFullscreen() {
+        fullscreenTried = true;
+        const entered = await attempt(() => requestFullscreen.call(root, { navigationUI: "hide" }));
+        if (entered && screen.orientation && screen.orientation.lock) {
+            await attempt(() => screen.orientation.lock("landscape"));
+        }
+        evaluate();
+    }
+
+    fullscreenOverlay.addEventListener("click", enterFullscreen);
+    document.addEventListener("fullscreenchange", evaluate);
+    document.addEventListener("webkitfullscreenchange", evaluate);
+
     document.addEventListener("touchstart", onTouchStart, { passive: true });
     document.addEventListener("touchmove", onTouchMove, { passive: false });
     document.addEventListener("touchend", onTouchEnd, { passive: true });
@@ -146,4 +197,6 @@
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", scheduleResize);
     }
+
+    evaluate();
 })();
