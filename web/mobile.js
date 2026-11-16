@@ -4,6 +4,7 @@
     const TAP_MAX_MILLISECONDS = 300;
     const TAP_MAX_MOVEMENT_PIXELS = 20;
     const RESIZE_DEBOUNCE_MILLISECONDS = 200;
+    const SAFETY_POLL_MILLISECONDS = 500;
 
     const root = document.documentElement;
     const touchDevice = navigator.maxTouchPoints > 0 && window.matchMedia("(pointer: coarse)").matches;
@@ -26,13 +27,28 @@
     root.classList.add("touch");
 
     const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+    const scrollMode = !requestFullscreen;
     const fullscreenOverlay = createOverlay("fullscreen-overlay", "Tap to enter fullscreen");
+    const swipeOverlay = createOverlay("swipe-overlay", "Swipe up to enter fullscreen");
+    const rotateOverlay = createOverlay("rotate-overlay", "Rotate your device");
+    const probe = scrollMode ? createMarker("viewport-probe") : null;
+    if (scrollMode) {
+        createMarker("scroll-spacer");
+    }
     let fullscreenTried = false;
+    let lastSignature = "";
 
     let stickId = null;
     const origin = { x: 0, y: 0 };
     const pending = new Map();
-    let resizeTimer = 0;
+    let evaluateTimer = 0;
+
+    function createMarker(id) {
+        const element = document.createElement("div");
+        element.id = id;
+        document.body.appendChild(element);
+        return element;
+    }
 
     function createOverlay(id, text) {
         const element = document.createElement("div");
@@ -140,25 +156,39 @@
         }
     }
 
-    function scheduleResize() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resizeGame, RESIZE_DEBOUNCE_MILLISECONDS);
-    }
-
     function inFullscreen() {
         return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
     }
 
+    function barsCollapsed() {
+        return navigator.standalone === true || window.innerHeight >= probe.offsetHeight - 2;
+    }
+
     function evaluate() {
-        const needsFullscreen = Boolean(requestFullscreen) && !inFullscreen() && !fullscreenTried;
+        const portrait = window.matchMedia("(orientation: portrait)").matches;
+        const needsFullscreen = Boolean(requestFullscreen) && !inFullscreen() && !fullscreenTried && !portrait;
+        const needsSwipe = scrollMode && !portrait && !barsCollapsed();
+        const blocked = portrait || needsFullscreen || needsSwipe;
+        const signature = [portrait, needsFullscreen, needsSwipe, window.innerWidth, window.innerHeight].join("|");
+        if (signature === lastSignature) {
+            return;
+        }
+        lastSignature = signature;
+        root.classList.toggle("portrait", portrait);
         root.classList.toggle("needs-fullscreen", needsFullscreen);
-        root.classList.toggle("immersive", !needsFullscreen);
-        state.blocked = needsFullscreen;
-        if (state.blocked) {
+        root.classList.toggle("needs-swipe", needsSwipe);
+        root.classList.toggle("immersive", !blocked);
+        state.blocked = blocked;
+        if (blocked) {
             resetStick();
             pending.clear();
         }
-        scheduleResize();
+        resizeGame();
+    }
+
+    function scheduleEvaluate() {
+        clearTimeout(evaluateTimer);
+        evaluateTimer = setTimeout(evaluate, RESIZE_DEBOUNCE_MILLISECONDS);
     }
 
     async function attempt(action) {
@@ -192,10 +222,20 @@
         document.addEventListener(name, (event) => event.preventDefault());
     });
 
-    window.addEventListener("resize", scheduleResize);
-    window.addEventListener("orientationchange", scheduleResize);
+    rotateOverlay.addEventListener("click", () => {
+        if (requestFullscreen && !fullscreenTried && !inFullscreen()) {
+            enterFullscreen();
+        }
+    });
+
+    window.addEventListener("resize", scheduleEvaluate);
+    window.addEventListener("orientationchange", scheduleEvaluate);
     if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", scheduleResize);
+        window.visualViewport.addEventListener("resize", scheduleEvaluate);
+    }
+    if (scrollMode) {
+        window.addEventListener("scroll", scheduleEvaluate);
+        setInterval(evaluate, SAFETY_POLL_MILLISECONDS);
     }
 
     evaluate();

@@ -44,6 +44,41 @@ html.needs-fullscreen #fullscreen-overlay {
     display: flex;
 }
 
+html.needs-swipe #swipe-overlay {
+    display: flex;
+    touch-action: pan-y;
+}
+
+html.portrait #rotate-overlay {
+    display: flex;
+}
+
+#viewport-probe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100vh;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#scroll-spacer {
+    width: 1px;
+    height: calc(100vh + 200px);
+    pointer-events: none;
+}
+
+@supports (height: 100lvh) {
+    #viewport-probe {
+        height: 100lvh;
+    }
+
+    #scroll-spacer {
+        height: calc(100lvh + 200px);
+    }
+}
+
 canvas.emscripten {
     position: fixed !important;
     top: 0 !important;
