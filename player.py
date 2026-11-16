@@ -22,10 +22,12 @@ from constants import (
     WEAPON_MAX_LEVEL,
     WEAPON_FIRE_RATE_BONUS_PER_LEVEL,
     WEAPON_EXTRA_BEAMS,
+    TOUCH_THRUST_ALIGNMENT_DEGREES,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
 )
 from shot import Shot
+from touch import TouchBridge
 
 
 def move_toward_zero(value: float, step: float) -> float:
@@ -36,6 +38,7 @@ def move_toward_zero(value: float, step: float) -> float:
 
 class Player(Shape):
     texture: pygame.Surface
+    touch: TouchBridge | None = None
 
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, PLAYER_RADIUS)
@@ -137,6 +140,27 @@ class Player(Shape):
             self.speed += direction * PLAYER_ACCELERATION * dt
             self.speed = max(-PLAYER_SPEED, min(PLAYER_SPEED, self.speed))
 
+    def steer_toward(self, vector: pygame.Vector2, dt: float) -> float:
+        target = pygame.Vector2(0, 1).angle_to(vector)
+        difference = (target - self.rotation + 180) % 360 - 180
+        step = PLAYER_TURN_SPEED * dt
+        applied = max(-step, min(step, difference))
+        self.rotation += applied
+        return abs(difference - applied)
+
+    def approach_speed(self, target: float, dt: float) -> None:
+        if self.speed < target:
+            self.speed = min(target, self.speed + PLAYER_ACCELERATION * dt)
+        else:
+            self.speed = max(target, self.speed - PLAYER_DECELERATION * dt)
+
+    def apply_touch_thrust(self, vector: pygame.Vector2, dt: float) -> None:
+        misalignment = self.steer_toward(vector, dt)
+        if misalignment < TOUCH_THRUST_ALIGNMENT_DEGREES:
+            self.approach_speed(PLAYER_SPEED * vector.length(), dt)
+        else:
+            self.apply_thrust(0, dt)
+
     def move(self, dt: float) -> None:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.velocity = forward * self.speed
@@ -169,7 +193,11 @@ class Player(Shape):
             direction += 1
         if keys[pygame.K_s]:
             direction -= 1
-        self.apply_thrust(direction, dt)
+        stick = self.touch.stick if self.touch is not None else None
+        if direction == 0 and stick is not None and stick.length_squared() > 0:
+            self.apply_touch_thrust(stick, dt)
+        else:
+            self.apply_thrust(direction, dt)
         self.move(dt)
         self.shoot()
 
