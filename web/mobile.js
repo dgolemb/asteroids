@@ -113,7 +113,7 @@
         }
         for (const touch of Array.from(event.changedTouches)) {
             pending.set(touch.identifier, { x: touch.clientX, y: touch.clientY, time: event.timeStamp });
-            if (stickId === null && touch.clientX < window.innerWidth / 2) {
+            if (stickId === null) {
                 stickId = touch.identifier;
                 origin.x = touch.clientX;
                 origin.y = touch.clientY;
