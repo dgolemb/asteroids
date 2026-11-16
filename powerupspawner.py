@@ -7,7 +7,7 @@ from constants import (
     POWERUP_SPAWN_MIN_SECONDS,
     POWERUP_SPAWN_MAX_SECONDS,
     POWERUP_SPAWN_ATTEMPTS,
-    WEAPON_KIND,
+    POWERUP_STACKABLE_KINDS,
 )
 from powerup import Powerup
 
@@ -20,19 +20,20 @@ class PowerupSpawner(pygame.sprite.Sprite):
             super().__init__()
         self.powerups = powerups
         self.player = player
-        self.spawn_timer = 0.0
-        self.next_spawn_seconds = self.random_interval()
+        self.spawn_timers: dict[str, float] = {}
+        self.next_spawn_seconds: dict[str, float] = {}
 
     def random_interval(self) -> float:
         return random.uniform(POWERUP_SPAWN_MIN_SECONDS, POWERUP_SPAWN_MAX_SECONDS)
 
-    def available_kinds(self) -> list[str]:
-        present = {powerup.kind for powerup in self.powerups}
-        return [
-            kind
-            for kind in Powerup.textures
-            if kind not in present and (kind == WEAPON_KIND or not self.player.has_effect(kind))
-        ]
+    def is_available(self, kind: str) -> bool:
+        if any(powerup.kind == kind for powerup in self.powerups):
+            return False
+        return kind in POWERUP_STACKABLE_KINDS or not self.player.has_effect(kind)
+
+    def reset_schedule(self, kind: str) -> None:
+        self.spawn_timers[kind] = 0.0
+        self.next_spawn_seconds[kind] = self.random_interval()
 
     def random_position(self) -> pygame.Vector2 | None:
         for _ in range(POWERUP_SPAWN_ATTEMPTS):
@@ -45,17 +46,17 @@ class PowerupSpawner(pygame.sprite.Sprite):
         return None
 
     def update(self, dt: float) -> None:
-        self.spawn_timer += dt
-        if self.spawn_timer < self.next_spawn_seconds:
-            return
-        kinds = self.available_kinds()
-        if not kinds:
-            self.spawn_timer = 0.0
-            self.next_spawn_seconds = self.random_interval()
-            return
-        position = self.random_position()
-        if position is None:
-            return
-        self.spawn_timer = 0.0
-        self.next_spawn_seconds = self.random_interval()
-        Powerup(position.x, position.y, random.choice(kinds))
+        for kind in Powerup.textures:
+            if kind not in self.spawn_timers:
+                self.reset_schedule(kind)
+            self.spawn_timers[kind] += dt
+            if self.spawn_timers[kind] < self.next_spawn_seconds[kind]:
+                continue
+            if not self.is_available(kind):
+                self.reset_schedule(kind)
+                continue
+            position = self.random_position()
+            if position is None:
+                continue
+            self.reset_schedule(kind)
+            Powerup(position.x, position.y, kind)
