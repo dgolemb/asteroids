@@ -21,6 +21,7 @@ from constants import (
     WEAPON_DURATION_SECONDS,
     WEAPON_MAX_LEVEL,
     WEAPON_FIRE_RATE_BONUS_PER_LEVEL,
+    WEAPON_EXTRA_BEAMS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
 )
@@ -61,6 +62,13 @@ class Player(Shape):
     def reset_weapon(self) -> None:
         self.weapon_level = 0
         self.active_effects.pop(WEAPON_KIND, None)
+
+    def beam_angles(self) -> list[float]:
+        angles = [0]
+        for min_level, angle in WEAPON_EXTRA_BEAMS:
+            if self.weapon_level >= min_level:
+                angles.extend((angle, -angle))
+        return angles
 
     def shoot_cooldown(self) -> float:
         return PLAYER_SHOOT_COOLDOWN_SECONDS / (1 + WEAPON_FIRE_RATE_BONUS_PER_LEVEL * self.weapon_level)
@@ -142,8 +150,9 @@ class Player(Shape):
             return
         else:
             self.shoot_timer = self.shoot_cooldown()
-        shot = Shot(self.position.x, self.position.y, self.weapon_level)
-        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
+        for angle in self.beam_angles():
+            shot = Shot(self.position.x, self.position.y, self.weapon_level)
+            shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation + angle) * PLAYER_SHOT_SPEED
 
     def update(self, dt: float) -> None:
         self.shoot_timer -= dt
