@@ -45,6 +45,28 @@ def load_pixel_sprite(path, scale):
     return pygame.transform.scale(image, (width * scale, height * scale))
 
 
+def new_game():
+    updatable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
+    powerups = pygame.sprite.Group()
+
+    Player.containers = (updatable, drawable)
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = (updatable)
+    Shot.containers = (shots, updatable, drawable)
+    ExplosionParticle.containers = (updatable, drawable)
+    Powerup.containers = (powerups, updatable)
+    PowerupSpawner.containers = (updatable)
+
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    asteroid_field = AsteroidField(asteroids)
+    PowerupSpawner(powerups, player)
+    hud = Hud()
+    return updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud
+
+
 async def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
@@ -62,25 +84,7 @@ async def main():
     Shot.texture = load_sprite(SHOT_TEXTURE_PATH, SHOT_TEXTURE_SCALE)
     Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
 
-    updatable = pygame.sprite.Group()
-    drawable = pygame.sprite.Group()
-    asteroids = pygame.sprite.Group()
-    shots = pygame.sprite.Group()
-    powerups = pygame.sprite.Group()
-
-    Player.containers = (updatable, drawable)
-    Asteroid.containers = (asteroids, updatable, drawable)
-    AsteroidField.containers = (updatable)
-    Shot.containers = (shots, updatable, drawable)
-    ExplosionParticle.containers = (updatable, drawable)
-    Powerup.containers = (powerups, updatable)
-    PowerupSpawner.containers = (updatable)
-
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    asteroid_field = AsteroidField(asteroids)
-    powerup_spawner = PowerupSpawner(powerups, player)
-    hud = Hud()
-
+    updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
 
     while True:
         log_state()
