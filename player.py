@@ -143,7 +143,6 @@ class Player(Shape):
             direction -= 1
         self.apply_thrust(direction, dt)
         self.move(dt)
-        if keys[pygame.K_SPACE]:
-            self.shoot()
+        self.shoot()
 
     
