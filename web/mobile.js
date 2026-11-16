@@ -26,7 +26,8 @@
 
     root.classList.add("touch");
 
-    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+    const fullscreenAllowed = document.fullscreenEnabled || document.webkitFullscreenEnabled;
+    const requestFullscreen = fullscreenAllowed ? root.requestFullscreen || root.webkitRequestFullscreen : null;
     const scrollMode = !requestFullscreen;
     const fullscreenOverlay = createOverlay("fullscreen-overlay", "Tap to enter fullscreen");
     const swipeOverlay = createOverlay("swipe-overlay", "Swipe up to enter fullscreen");
