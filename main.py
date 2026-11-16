@@ -82,7 +82,10 @@ async def main():
     Asteroid.texture = pygame.image.load(ASTEROID_TEXTURE_PATH).convert()
     Asteroid.generate_shapes()
     Player.texture = load_sprite(PLAYER_TEXTURE_PATH, PLAYER_TEXTURE_SCALE)
-    Shot.texture = load_sprite(SHOT_TEXTURE_PATH, SHOT_TEXTURE_SCALE)
+    Shot.textures = [
+        load_sprite(SHOT_TEXTURE_PATH, SHOT_TEXTURE_SCALE * (1 + WEAPON_SHOT_SCALE_PER_LEVEL * level))
+        for level in range(WEAPON_MAX_LEVEL + 1)
+    ]
     Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
 
     updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()

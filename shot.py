@@ -1,21 +1,23 @@
 import pygame
 from shape import Shape
-from constants import SHOT_RADIUS, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SHOT_RADIUS, WEAPON_SHOT_SCALE_PER_LEVEL, SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class Shot(Shape):
-    texture: pygame.Surface
+    textures: list[pygame.Surface] = []
 
-    def __init__(self, x: float, y: float) -> None:
-        super().__init__(x, y, SHOT_RADIUS)
+    def __init__(self, x: float, y: float, level: int = 0) -> None:
+        super().__init__(x, y, SHOT_RADIUS * (1 + WEAPON_SHOT_SCALE_PER_LEVEL * level))
+        self.level = level
 
     def rotated_image(self) -> pygame.Surface:
+        texture = self.textures[self.level]
         if self.velocity.length_squared() == 0:
-            return self.texture
-        return pygame.transform.rotate(self.texture, -pygame.Vector2(0, -1).angle_to(self.velocity))
+            return texture
+        return pygame.transform.rotate(texture, -pygame.Vector2(0, -1).angle_to(self.velocity))
 
     def bounding_radius(self) -> float:
-        width, height = self.texture.get_size()
+        width, height = self.textures[self.level].get_size()
         return pygame.Vector2(width, height).length() / 2
 
     def get_mask(self) -> pygame.Mask:
