@@ -1,5 +1,5 @@
-html,
-body {
+html.touch,
+html.touch body {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -11,7 +11,7 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-html body {
+html.touch body {
     background: #000 !important;
 }
 
@@ -79,7 +79,7 @@ html.portrait #rotate-overlay {
     }
 }
 
-canvas.emscripten {
+html.touch canvas.emscripten {
     position: fixed !important;
     top: 0 !important;
     right: 0 !important;
