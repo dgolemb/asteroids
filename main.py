@@ -7,6 +7,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
 from hud import Hud
+from menu import Menu, GameState
 from explosion import ExplosionParticle
 from powerup import Powerup
 from powerupspawner import PowerupSpawner
@@ -86,42 +87,84 @@ async def main():
 
     updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
 
+    menu = Menu()
+    state = GameState.MENU
+    final_score = 0
+
     while True:
         log_state()
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 return
-        updatable.update(dt)
-        hud.level = asteroid_field.level
-        for powerup in powerups:
-            if powerup.collides_with(player):
-                log_event("powerup_picked", kind=powerup.kind)
-                player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
-                powerup.kill()
-        for asteroid in asteroids:
-            if player.shield_active() and shield_hits(player, asteroid):
-                destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shielded")
-                continue
-            if not player.is_invulnerable() and asteroid.collides_with(player):
-                log_event("player_hit")
-                hud.lose_life()
-                if hud.is_game_over():
-                    print("Game over!")
-                    print(f"Final score: {hud.score}")
-                    return
-                player.respawn()
-            for shot in shots:
-                if shot.collides_with(asteroid):
-                    shot.kill()
-                    destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shot")
-                    break
+        pressed_keys = [event.key for event in events if event.type == pygame.KEYDOWN]
+
+        if state == GameState.MENU:
+            menu.update(dt)
+            if pygame.K_RETURN in pressed_keys:
+                updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud = new_game()
+                state = GameState.PLAYING
+        elif state == GameState.GAME_OVER:
+            if pygame.K_RETURN in pressed_keys:
+                menu.reset_blink()
+                state = GameState.MENU
+        elif state == GameState.PAUSED:
+            if pygame.K_ESCAPE in pressed_keys:
+                state = GameState.PLAYING
+            else:
+                if pygame.K_w in pressed_keys:
+                    menu.move_selection(-1)
+                if pygame.K_s in pressed_keys:
+                    menu.move_selection(1)
+                if pygame.K_RETURN in pressed_keys:
+                    if menu.selected_option() == MENU_OPTION_CONTINUE:
+                        state = GameState.PLAYING
+                    else:
+                        final_score = hud.score
+                        state = GameState.GAME_OVER
+        elif pygame.K_ESCAPE in pressed_keys:
+            menu.reset_selection()
+            state = GameState.PAUSED
+        else:
+            updatable.update(dt)
+            hud.level = asteroid_field.level
+            for powerup in powerups:
+                if powerup.collides_with(player):
+                    log_event("powerup_picked", kind=powerup.kind)
+                    player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
+                    powerup.kill()
+            for asteroid in asteroids:
+                if player.shield_active() and shield_hits(player, asteroid):
+                    destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shielded")
+                    continue
+                if not player.is_invulnerable() and asteroid.collides_with(player):
+                    log_event("player_hit")
+                    hud.lose_life()
+                    if hud.is_game_over():
+                        final_score = hud.score
+                        state = GameState.GAME_OVER
+                        break
+                    player.respawn()
+                for shot in shots:
+                    if shot.collides_with(asteroid):
+                        shot.kill()
+                        destroy_asteroid(asteroid, asteroid_field, hud, "asteroid_shot")
+                        break
+
         screen.blit(background, (0, 0))
-        for powerup in powerups:
-            powerup.draw(screen)
-        for object in drawable:
-            object.draw(screen)
-        player.draw_shield(screen)
-        hud.draw(screen)
+        if state == GameState.MENU:
+            menu.draw_title_screen(screen)
+        elif state == GameState.GAME_OVER:
+            menu.draw_game_over(screen, final_score)
+        else:
+            for powerup in powerups:
+                powerup.draw(screen)
+            for object in drawable:
+                object.draw(screen)
+            player.draw_shield(screen)
+            hud.draw(screen)
+            if state == GameState.PAUSED:
+                menu.draw_pause_menu(screen)
         pygame.display.flip()
         dt = clock.tick(60) / 1000
         await asyncio.sleep(0)
