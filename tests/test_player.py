@@ -8,6 +8,7 @@ from constants import (
     PLAYER_ACCELERATION,
     PLAYER_SPEED,
     PLAYER_TURN_SPEED,
+    TOUCH_THRUST_ALIGNMENT_DEGREES,
 )
 from player import Player
 
@@ -88,11 +89,33 @@ class TouchThrustTest(unittest.TestCase):
         self.update_with(player, (0, 1), 1)
         self.assertAlmostEqual(player.speed, PLAYER_ACCELERATION * DT)
 
-    def test_thrust_starts_immediately_while_the_nose_is_still_turning(self):
+    def test_no_thrust_while_the_nose_is_far_from_the_vector(self):
         player = new_player()
+        self.update_with(player, (0, -1), 10)
+        self.assertEqual(player.speed, 0.0)
+        self.assertAlmostEqual(abs(player.rotation), PLAYER_TURN_SPEED * DT * 10)
+
+    def test_thrust_starts_once_the_nose_is_aligned(self):
+        player = new_player()
+        self.update_with(player, (0, -1), 60)
+        self.assertGreater(player.speed, 0.0)
+
+    def test_thrust_starts_within_the_alignment_threshold(self):
+        player = new_player()
+        player.rotation = 180 - TOUCH_THRUST_ALIGNMENT_DEGREES + 1
         self.update_with(player, (0, -1), 1)
         self.assertAlmostEqual(player.speed, PLAYER_ACCELERATION * DT)
-        self.assertAlmostEqual(abs(player.rotation), PLAYER_TURN_SPEED * DT)
+
+    def test_speed_decays_while_turning_without_thrust(self):
+        player = new_player()
+        player.speed = PLAYER_SPEED
+        self.update_with(player, (0, -1), 1)
+        self.assertLess(player.speed, PLAYER_SPEED)
+
+    def test_steer_toward_reports_the_remaining_misalignment(self):
+        player = new_player()
+        remaining = player.steer_toward(pygame.Vector2(0, -1), DT)
+        self.assertAlmostEqual(remaining, 180 - PLAYER_TURN_SPEED * DT)
 
     def test_nose_catches_up_with_the_vector_while_thrusting(self):
         player = new_player()

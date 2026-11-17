@@ -24,6 +24,7 @@ from constants import (
     WEAPON_EXTRA_BEAMS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    TOUCH_THRUST_ALIGNMENT_DEGREES,
 )
 from shot import Shot
 from touch import TouchBridge
@@ -139,15 +140,18 @@ class Player(Shape):
             self.speed += direction * PLAYER_ACCELERATION * dt
             self.speed = max(-PLAYER_SPEED, min(PLAYER_SPEED, self.speed))
 
-    def steer_toward(self, vector: pygame.Vector2, dt: float) -> None:
+    def steer_toward(self, vector: pygame.Vector2, dt: float) -> float:
         target = pygame.Vector2(0, 1).angle_to(vector)
         difference = (target - self.rotation + 180) % 360 - 180
         step = PLAYER_TURN_SPEED * dt
-        self.rotation += max(-step, min(step, difference))
+        turn = max(-step, min(step, difference))
+        self.rotation += turn
+        return abs(difference - turn)
 
     def apply_touch_thrust(self, vector: pygame.Vector2, dt: float) -> None:
-        self.steer_toward(vector, dt)
-        self.apply_thrust(1, dt)
+        misalignment = self.steer_toward(vector, dt)
+        aligned = misalignment <= TOUCH_THRUST_ALIGNMENT_DEGREES
+        self.apply_thrust(1 if aligned else 0, dt)
 
     def move(self, dt: float) -> None:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
