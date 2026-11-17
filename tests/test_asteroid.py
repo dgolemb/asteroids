@@ -204,9 +204,12 @@ class AsteroidSplitTest(AsteroidTestCase):
     def test_splitting_the_whole_tree_takes_seven_hits(self):
         Asteroid(100, 100, ASTEROID_MIN_RADIUS * ASTEROID_KINDS).velocity = pygame.Vector2(10, 0)
         hits = 0
-        while len(self.asteroids):
+        for _ in range(20):
+            if not len(self.asteroids):
+                break
             next(iter(self.asteroids)).split()
             hits += 1
+        self.assertEqual(len(self.asteroids), 0)
         self.assertEqual(hits, 1 + 2 + 4)
         self.assertEqual(self.logged_events().count("asteroid_split"), 3)
         self.assertEqual(self.logged_events().count("asteroid_explosion"), 7)
