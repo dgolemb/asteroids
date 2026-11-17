@@ -43,6 +43,40 @@ def shield_hits(player, asteroid):
     return player.wrapped_delta(asteroid).length() <= SHIELD_RADIUS + asteroid.radius
 
 
+def apply_powerup(powerup, player, hud, stats):
+    log_event("powerup_picked", kind=powerup.kind)
+    stats.record_powerup(powerup.kind)
+    if powerup.kind == WEAPON_KIND:
+        player.upgrade_weapon()
+    elif powerup.kind == HEART_KIND:
+        hud.collect_heart()
+    else:
+        player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
+    powerup.kill()
+
+
+def resolve_collisions(player, powerups, asteroids, shots, asteroid_field, hud, stats):
+    for powerup in powerups:
+        if powerup.collides_with(player):
+            apply_powerup(powerup, player, hud, stats)
+    for asteroid in asteroids:
+        if player.shield_active() and shield_hits(player, asteroid):
+            destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shielded")
+            continue
+        if not player.is_invulnerable() and asteroid.collides_with(player):
+            log_event("player_hit")
+            hud.lose_life()
+            if hud.is_game_over():
+                return True
+            player.start_invulnerability()
+        for shot in shots:
+            if shot.collides_with(asteroid):
+                shot.kill()
+                destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shot")
+                break
+    return False
+
+
 def load_pixel_sprite(path, scale):
     image = pygame.image.load(path).convert_alpha()
     width, height = image.get_size()
@@ -163,34 +197,9 @@ async def main():
             hud.level = asteroid_field.level
             stats.add_time(dt)
             stats.set_level(asteroid_field.level)
-            for powerup in powerups:
-                if powerup.collides_with(player):
-                    log_event("powerup_picked", kind=powerup.kind)
-                    stats.record_powerup(powerup.kind)
-                    if powerup.kind == WEAPON_KIND:
-                        player.upgrade_weapon()
-                    elif powerup.kind == HEART_KIND:
-                        hud.collect_heart()
-                    else:
-                        player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
-                    powerup.kill()
-            for asteroid in asteroids:
-                if player.shield_active() and shield_hits(player, asteroid):
-                    destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shielded")
-                    continue
-                if not player.is_invulnerable() and asteroid.collides_with(player):
-                    log_event("player_hit")
-                    hud.lose_life()
-                    if hud.is_game_over():
-                        final_score = hud.score
-                        state = GameState.GAME_OVER
-                        break
-                    player.start_invulnerability()
-                for shot in shots:
-                    if shot.collides_with(asteroid):
-                        shot.kill()
-                        destroy_asteroid(asteroid, asteroid_field, hud, stats, "asteroid_shot")
-                        break
+            if resolve_collisions(player, powerups, asteroids, shots, asteroid_field, hud, stats):
+                final_score = hud.score
+                state = GameState.GAME_OVER
 
         screen.blit(background, (0, 0))
         if state == GameState.MENU:
