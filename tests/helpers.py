@@ -12,6 +12,14 @@ def pressed(*keys):
     return defaultdict(bool, {key: True for key in keys})
 
 
+def lowest_uniform(low, high):
+    return low
+
+
+def middle_uniform(low, high):
+    return (low + high) / 2
+
+
 def solid_texture():
     texture = pygame.Surface((64, 64), pygame.SRCALPHA)
     texture.fill((255, 255, 255, 255))

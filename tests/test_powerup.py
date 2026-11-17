@@ -23,20 +23,13 @@ from constants import (
 from player import Player
 from powerup import Powerup
 from powerupspawner import PowerupSpawner
+from tests.helpers import lowest_uniform, middle_uniform
 
 
 def solid_surface(size=60):
     surface = pygame.Surface((size, size), pygame.SRCALPHA)
     surface.fill((255, 255, 255, 255))
     return surface
-
-
-def lowest_uniform(low, high):
-    return low
-
-
-def middle_uniform(low, high):
-    return (low + high) / 2
 
 
 class PowerupTestCase(unittest.TestCase):
