@@ -8,32 +8,40 @@ from constants import (
     POWERUP_SPAWN_MAX_SECONDS,
     POWERUP_SPAWN_ATTEMPTS,
     POWERUP_STACKABLE_KINDS,
+    HEART_KIND,
+    HEART_SPAWN_MIN_SECONDS,
+    HEART_SPAWN_MAX_SECONDS,
 )
 from powerup import Powerup
 
 
 class PowerupSpawner(pygame.sprite.Sprite):
-    def __init__(self, powerups: pygame.sprite.Group, player) -> None:
+    def __init__(self, powerups: pygame.sprite.Group, player, hud) -> None:
         if hasattr(self, "containers"):
             super().__init__(self.containers)
         else:
             super().__init__()
         self.powerups = powerups
         self.player = player
+        self.hud = hud
         self.spawn_timers: dict[str, float] = {}
         self.next_spawn_seconds: dict[str, float] = {}
 
-    def random_interval(self) -> float:
+    def random_interval(self, kind: str) -> float:
+        if kind == HEART_KIND:
+            return random.uniform(HEART_SPAWN_MIN_SECONDS, HEART_SPAWN_MAX_SECONDS)
         return random.uniform(POWERUP_SPAWN_MIN_SECONDS, POWERUP_SPAWN_MAX_SECONDS)
 
     def is_available(self, kind: str) -> bool:
         if any(powerup.kind == kind for powerup in self.powerups):
             return False
+        if kind == HEART_KIND:
+            return not self.hud.has_full_lives()
         return kind in POWERUP_STACKABLE_KINDS or not self.player.has_effect(kind)
 
     def reset_schedule(self, kind: str) -> None:
         self.spawn_timers[kind] = 0.0
-        self.next_spawn_seconds[kind] = self.random_interval()
+        self.next_spawn_seconds[kind] = self.random_interval(kind)
 
     def random_position(self) -> pygame.Vector2 | None:
         for _ in range(POWERUP_SPAWN_ATTEMPTS):

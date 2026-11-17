@@ -1,10 +1,10 @@
-from constants import ASTEROID_KINDS, ASTEROID_KIND_NAMES, SHIELD_KIND, WEAPON_KIND
+from constants import ASTEROID_KINDS, ASTEROID_KIND_NAMES, SHIELD_KIND, WEAPON_KIND, HEART_KIND
 
 
 class GameStats:
     def __init__(self) -> None:
         self.asteroids_destroyed = {kind: 0 for kind in range(1, ASTEROID_KINDS + 1)}
-        self.powerups_collected = {SHIELD_KIND: 0, WEAPON_KIND: 0}
+        self.powerups_collected = {SHIELD_KIND: 0, WEAPON_KIND: 0, HEART_KIND: 0}
         self.play_time = 0.0
         self.level = 1
 
