@@ -8,7 +8,8 @@ from constants import (
     PLAYER_RESPAWN_INVULNERABILITY_SECONDS,
     PLAYER_START_LIVES,
     SHIELD_KIND,
-    POWERUP_SPAWN_MAX_SECONDS,
+    HEART_SPAWN_MIN_SECONDS,
+    HEART_SPAWN_MAX_SECONDS,
 )
 from hud import Hud
 from player import Player
@@ -111,18 +112,19 @@ class HeartSpawnTest(unittest.TestCase):
 
     def test_no_heart_spawns_while_lives_are_full(self):
         spawner, powerups = new_spawner(self.hud, self.player)
-        for _ in range(int(POWERUP_SPAWN_MAX_SECONDS * 3) * 60):
+        for _ in range(int(HEART_SPAWN_MAX_SECONDS * 3) * 20):
             spawner.update(1 / 20)
         self.assertEqual(len(powerups), 0)
 
     def test_heart_spawns_after_losing_a_life(self):
         spawner, powerups = new_spawner(self.hud, self.player)
         self.hud.lose_life()
-        for _ in range(60 * 60):
+        elapsed = 0.0
+        while elapsed < HEART_SPAWN_MAX_SECONDS + 1 and not len(powerups):
             spawner.update(1 / 20)
-            if len(powerups):
-                break
+            elapsed += 1 / 20
         self.assertEqual([powerup.kind for powerup in powerups], [HEART_KIND])
+        self.assertGreaterEqual(elapsed, HEART_SPAWN_MIN_SECONDS)
 
 
 if __name__ == "__main__":
