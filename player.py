@@ -62,10 +62,6 @@ class Player(Shape):
         self.weapon_level = min(self.weapon_level + 1, WEAPON_MAX_LEVEL)
         self.add_effect(WEAPON_KIND, WEAPON_DURATION_SECONDS)
 
-    def reset_weapon(self) -> None:
-        self.weapon_level = 0
-        self.active_effects.pop(WEAPON_KIND, None)
-
     def beam_angles(self) -> list[float]:
         angles = [0]
         for min_level, angle in WEAPON_EXTRA_BEAMS:
