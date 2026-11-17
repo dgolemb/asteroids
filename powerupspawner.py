@@ -16,14 +16,13 @@ from powerup import Powerup
 
 
 class PowerupSpawner(pygame.sprite.Sprite):
-    def __init__(self, powerups: pygame.sprite.Group, player, hud) -> None:
+    def __init__(self, powerups: pygame.sprite.Group, player) -> None:
         if hasattr(self, "containers"):
             super().__init__(self.containers)
         else:
             super().__init__()
         self.powerups = powerups
         self.player = player
-        self.hud = hud
         self.spawn_timers: dict[str, float] = {}
         self.next_spawn_seconds: dict[str, float] = {}
 
@@ -36,7 +35,7 @@ class PowerupSpawner(pygame.sprite.Sprite):
         if any(powerup.kind == kind for powerup in self.powerups):
             return False
         if kind == HEART_KIND:
-            return not self.hud.has_full_lives()
+            return True
         return kind in POWERUP_STACKABLE_KINDS or not self.player.has_effect(kind)
 
     def reset_schedule(self, kind: str) -> None:

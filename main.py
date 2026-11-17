@@ -66,8 +66,8 @@ def new_game():
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField(asteroids)
+    PowerupSpawner(powerups, player)
     hud = Hud()
-    PowerupSpawner(powerups, player, hud)
     stats = GameStats()
     return updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats
 
@@ -170,7 +170,7 @@ async def main():
                     if powerup.kind == WEAPON_KIND:
                         player.upgrade_weapon()
                     elif powerup.kind == HEART_KIND:
-                        hud.add_life()
+                        hud.collect_heart()
                     else:
                         player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
                     powerup.kill()

@@ -10,6 +10,7 @@ from constants import (
     SHIELD_KIND,
     HEART_SPAWN_MIN_SECONDS,
     HEART_SPAWN_MAX_SECONDS,
+    HEART_FULL_LIVES_BONUS_SCORE,
 )
 from hud import Hud
 from player import Player
@@ -17,10 +18,10 @@ from powerup import Powerup
 from powerupspawner import PowerupSpawner
 
 
-def new_spawner(hud, player):
+def new_spawner(player):
     powerups = pygame.sprite.Group()
     Powerup.containers = (powerups,)
-    return PowerupSpawner(powerups, player, hud), powerups
+    return PowerupSpawner(powerups, player), powerups
 
 
 class HudLivesTest(unittest.TestCase):
@@ -44,6 +45,19 @@ class HudLivesTest(unittest.TestCase):
         hud.add_life()
         self.assertEqual(hud.lives, PLAYER_MAX_LIVES - 1)
         self.assertFalse(hud.has_full_lives())
+
+    def test_collecting_a_heart_with_full_lives_awards_bonus_score(self):
+        hud = Hud()
+        hud.collect_heart()
+        self.assertEqual(hud.lives, PLAYER_MAX_LIVES)
+        self.assertEqual(hud.score, HEART_FULL_LIVES_BONUS_SCORE)
+
+    def test_collecting_a_heart_with_missing_life_restores_it_without_score(self):
+        hud = Hud()
+        hud.lose_life()
+        hud.collect_heart()
+        self.assertEqual(hud.lives, PLAYER_MAX_LIVES)
+        self.assertEqual(hud.score, 0)
 
     def test_game_over_at_zero_lives(self):
         hud = Hud()
@@ -73,58 +87,47 @@ class PlayerInvulnerabilityTest(unittest.TestCase):
 
 class HeartSpawnTest(unittest.TestCase):
     def setUp(self):
-        pygame.font.init()
         Powerup.textures = {HEART_KIND: pygame.Surface((60, 60), pygame.SRCALPHA)}
-        self.hud = Hud()
         self.player = Player(640, 360)
 
     def tearDown(self):
         Powerup.textures = {}
         Powerup.containers = ()
 
-    def test_not_available_with_full_lives(self):
-        spawner, _ = new_spawner(self.hud, self.player)
-        self.assertFalse(spawner.is_available(HEART_KIND))
-
-    def test_available_after_losing_a_life(self):
-        spawner, _ = new_spawner(self.hud, self.player)
-        self.hud.lose_life()
+    def test_available_regardless_of_lives(self):
+        spawner, _ = new_spawner(self.player)
         self.assertTrue(spawner.is_available(HEART_KIND))
 
     def test_not_available_while_a_heart_is_on_screen(self):
-        spawner, powerups = new_spawner(self.hud, self.player)
-        self.hud.lose_life()
+        spawner, powerups = new_spawner(self.player)
         Powerup(100, 100, HEART_KIND)
         self.assertEqual(len(powerups), 1)
         self.assertFalse(spawner.is_available(HEART_KIND))
 
-    def test_not_available_again_once_lives_are_refilled(self):
-        spawner, _ = new_spawner(self.hud, self.player)
-        self.hud.lose_life()
-        self.hud.add_life()
-        self.assertFalse(spawner.is_available(HEART_KIND))
-
     def test_heart_does_not_depend_on_player_effects(self):
-        spawner, _ = new_spawner(self.hud, self.player)
-        self.hud.lose_life()
+        spawner, _ = new_spawner(self.player)
         self.player.add_effect(SHIELD_KIND, 30)
         self.assertTrue(spawner.is_available(HEART_KIND))
 
-    def test_no_heart_spawns_while_lives_are_full(self):
-        spawner, powerups = new_spawner(self.hud, self.player)
-        for _ in range(int(HEART_SPAWN_MAX_SECONDS * 3) * 20):
-            spawner.update(1 / 20)
-        self.assertEqual(len(powerups), 0)
-
-    def test_heart_spawns_after_losing_a_life(self):
-        spawner, powerups = new_spawner(self.hud, self.player)
-        self.hud.lose_life()
+    def test_heart_spawns_within_the_configured_window(self):
+        spawner, powerups = new_spawner(self.player)
         elapsed = 0.0
         while elapsed < HEART_SPAWN_MAX_SECONDS + 1 and not len(powerups):
             spawner.update(1 / 20)
             elapsed += 1 / 20
         self.assertEqual([powerup.kind for powerup in powerups], [HEART_KIND])
         self.assertGreaterEqual(elapsed, HEART_SPAWN_MIN_SECONDS)
+
+    def test_next_heart_follows_after_the_previous_one_is_gone(self):
+        spawner, powerups = new_spawner(self.player)
+        spawned = 0
+        for _ in range(int(HEART_SPAWN_MAX_SECONDS * 3 * 20)):
+            spawner.update(1 / 20)
+            if len(powerups):
+                spawned += 1
+                for powerup in list(powerups):
+                    powerup.kill()
+        self.assertGreaterEqual(spawned, 2)
 
 
 if __name__ == "__main__":

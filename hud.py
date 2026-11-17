@@ -5,6 +5,7 @@ from constants import (
     HUD_MARGIN,
     HUD_LINE_SPACING,
     HUD_HEART_SPACING,
+    HEART_FULL_LIVES_BONUS_SCORE,
     PLAYER_START_LIVES,
     PLAYER_MAX_LIVES,
 )
@@ -28,6 +29,12 @@ class Hud:
 
     def add_life(self) -> None:
         self.lives = min(self.lives + 1, PLAYER_MAX_LIVES)
+
+    def collect_heart(self) -> None:
+        if self.has_full_lives():
+            self.add_score(HEART_FULL_LIVES_BONUS_SCORE)
+        else:
+            self.add_life()
 
     def has_full_lives(self) -> bool:
         return self.lives >= PLAYER_MAX_LIVES
