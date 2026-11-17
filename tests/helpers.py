@@ -1,10 +1,15 @@
 import unittest
+from collections import defaultdict
 from unittest import mock
 
 import pygame
 
 from asteroid import Asteroid
 from explosion import ExplosionParticle
+
+
+def pressed(*keys):
+    return defaultdict(bool, {key: True for key in keys})
 
 
 def solid_texture():
