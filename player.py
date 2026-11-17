@@ -82,7 +82,9 @@ class Player(Shape):
             if self.active_effects[kind] <= 0:
                 del self.active_effects[kind]
                 if kind == WEAPON_KIND:
-                    self.weapon_level = 0
+                    self.weapon_level = max(self.weapon_level - 1, 0)
+                    if self.weapon_level > 0:
+                        self.add_effect(WEAPON_KIND, WEAPON_DURATION_SECONDS)
 
     def shield_active(self) -> bool:
         return self.has_effect(SHIELD_KIND)
