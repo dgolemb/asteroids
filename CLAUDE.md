@@ -26,6 +26,7 @@ Terraform 1.15.6
 
 uv venv
 source .venv/bin/activate
+python -m unittest
 
 ## Code conventions
 
