@@ -103,13 +103,8 @@ class Player(Shape):
                 SHIELD_LINE_WIDTH,
             )
 
-    def respawn(self) -> None:
-        self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-        self.rotation = 0
-        self.velocity = pygame.Vector2(0, 0)
-        self.speed = 0.0
+    def start_invulnerability(self) -> None:
         self.invulnerable_timer = PLAYER_RESPAWN_INVULNERABILITY_SECONDS
-        self.reset_weapon()
 
     def rotated_image(self) -> pygame.Surface:
         return pygame.transform.rotate(self.texture, 180 - self.rotation)

@@ -66,8 +66,8 @@ def new_game():
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField(asteroids)
-    PowerupSpawner(powerups, player)
     hud = Hud()
+    PowerupSpawner(powerups, player, hud)
     stats = GameStats()
     return updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats
 
@@ -92,6 +92,9 @@ async def main():
     ]
     Powerup.textures[SHIELD_KIND] = load_pixel_sprite(POWERUP_SHIELD_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
     Powerup.textures[WEAPON_KIND] = load_pixel_sprite(POWERUP_WEAPON_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
+    Powerup.textures[HEART_KIND] = load_pixel_sprite(HEART_TEXTURE_PATH, POWERUP_TEXTURE_SCALE)
+    Hud.heart_full = load_pixel_sprite(HEART_TEXTURE_PATH, HUD_HEART_SCALE)
+    Hud.heart_empty = load_pixel_sprite(HEART_EMPTY_TEXTURE_PATH, HUD_HEART_SCALE)
 
     updatable, drawable, asteroids, shots, powerups, player, asteroid_field, hud, stats = new_game()
 
@@ -166,6 +169,8 @@ async def main():
                     stats.record_powerup(powerup.kind)
                     if powerup.kind == WEAPON_KIND:
                         player.upgrade_weapon()
+                    elif powerup.kind == HEART_KIND:
+                        hud.add_life()
                     else:
                         player.add_effect(powerup.kind, POWERUP_EFFECT_SECONDS[powerup.kind])
                     powerup.kill()
@@ -180,7 +185,7 @@ async def main():
                         final_score = hud.score
                         state = GameState.GAME_OVER
                         break
-                    player.respawn()
+                    player.start_invulnerability()
                 for shot in shots:
                     if shot.collides_with(asteroid):
                         shot.kill()
