@@ -47,3 +47,4 @@ Nie dodawaj informacji Co-Authored-By do commitow.
 Korzystaj z venv.
 Gdy nie jesteś pewien, zadawaj pytania zamiast zgadywać.
 Po kazdym zatwierdzonym i wykonanym Edit, commituj do aktualnego brancha z krótkim (1-2 zdania) opisem wprowadzonych zmian.
+Po kazdym commit zweryfikuj, czy tresc pliku README.md nadal odpowiada stanowi faktycznemu. Jesli nie, zaktualizuj README
