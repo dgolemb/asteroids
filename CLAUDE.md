@@ -26,6 +26,7 @@ Terraform 1.15.6
 
 uv venv
 source .venv/bin/activate
+python -m unittest
 
 ## Code conventions
 
@@ -39,9 +40,11 @@ Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie popro
 Nie komentuj kodu jeśli o to nie poproszę.
 Nie uzywaj emoji.
 Nie pisz dokumentacji jesli nie zostaniesz o to bezposrednio poproszony.
+Nie dodawaj informacji Co-Authored-By do commitow.
 
 ## Rules
 
 Korzystaj z venv.
 Gdy nie jesteś pewien, zadawaj pytania zamiast zgadywać.
 Po kazdym zatwierdzonym i wykonanym Edit, commituj do aktualnego brancha z krótkim (1-2 zdania) opisem wprowadzonych zmian.
+Po kazdym commit zweryfikuj, czy tresc pliku README.md nadal odpowiada stanowi faktycznemu. Jesli nie, zaktualizuj README

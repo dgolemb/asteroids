@@ -1,9 +1,11 @@
 output "tenant_id" {
-  value = data.azurerm_client_config.current.tenant_id
+  value     = data.azurerm_client_config.current.tenant_id
+  sensitive = true
 }
 
 output "client_id" {
-  value = data.azurerm_client_config.current.client_id
+  value     = data.azurerm_client_config.current.client_id
+  sensitive = true
 }
 
 output "web_app_name" {

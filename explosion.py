@@ -1,9 +1,9 @@
 import pygame
-from circleshape import CircleShape
+from shape import Shape
 from constants import EXPLOSION_PARTICLE_RADIUS
 
 
-class ExplosionParticle(CircleShape):
+class ExplosionParticle(Shape):
     def __init__(self, x: float, y: float, velocity: pygame.Vector2, lifetime: float) -> None:
         super().__init__(x, y, EXPLOSION_PARTICLE_RADIUS)
         self.velocity = velocity

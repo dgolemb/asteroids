@@ -21,6 +21,9 @@ RUN PYGBAG_VERSION=$(uv run --no-sync python -c "from importlib.metadata import 
         asteroids \
     && cp -r asteroids/build/web/. /app/www/
 
+COPY web/mobile.* web/
+RUN cp web/mobile.* /app/www/
+
 
 FROM nginx:1.30-alpine AS runtime
 

@@ -1,8 +1,8 @@
 import pygame
 import random
-from math import ceil
+from math import ceil, cos, pi, sin
 from logger import log_event
-from circleshape import CircleShape
+from shape import Shape
 from explosion import ExplosionParticle
 from constants import (
     ASTEROID_MIN_RADIUS,
@@ -15,11 +15,33 @@ from constants import (
     EXPLOSION_PARTICLE_SPEED_MAX,
     EXPLOSION_SPREAD_SCALE_PER_KIND,
     ASTEROID_ROTATION_SPEED_MAX,
+    ASTEROID_KINDS,
+    ASTEROID_SHAPE_POINTS,
+    ASTEROID_SHAPE_HARMONICS,
+    ASTEROID_SHAPE_AMPLITUDE,
 )
 
 
-class Asteroid(CircleShape):
+class Asteroid(Shape):
     texture: pygame.Surface
+    shapes: dict[int, list[tuple[float, float]]] = {}
+
+    @classmethod
+    def generate_shapes(cls) -> None:
+        cls.shapes = {}
+        for kind in range(1, ASTEROID_KINDS + 1):
+            waves = [
+                (harmonic, random.uniform(0, 2 * pi), random.uniform(0.5, 1.0) / harmonic)
+                for harmonic in ASTEROID_SHAPE_HARMONICS
+            ]
+            total = sum(weight for _, _, weight in waves)
+            points = []
+            for i in range(ASTEROID_SHAPE_POINTS):
+                angle = 2 * pi * i / ASTEROID_SHAPE_POINTS
+                wave = sum(weight * sin(harmonic * angle + phase) for harmonic, phase, weight in waves)
+                scale = 1 + ASTEROID_SHAPE_AMPLITUDE * wave / total
+                points.append((scale * cos(angle), scale * sin(angle)))
+            cls.shapes[kind] = points
 
     def __init__(self, x: float, y: float, radius: float) -> None:
         super().__init__(x, y, radius)
@@ -28,20 +50,29 @@ class Asteroid(CircleShape):
         self.image = self.create_textured_surface()
 
     def create_textured_surface(self) -> pygame.Surface:
-        size = ceil(self.radius * 2)
+        size = ceil(self.radius * 2 * (1 + ASTEROID_SHAPE_AMPLITUDE))
         scaled = pygame.transform.smoothscale(self.texture, (size, size))
         surface = pygame.Surface((size, size), pygame.SRCALPHA)
         surface.blit(scaled, (0, 0))
+        kind = round(self.radius / ASTEROID_MIN_RADIUS)
+        center = size / 2
+        outline = [(center + x * self.radius, center + y * self.radius) for x, y in self.shapes[kind]]
         mask = pygame.Surface((size, size), pygame.SRCALPHA)
-        pygame.draw.circle(mask, (255, 255, 255, 255), (size / 2, size / 2), self.radius)
+        pygame.draw.polygon(mask, (255, 255, 255, 255), outline)
         surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
         return surface
 
     def draw(self, screen: pygame.Surface) -> None:
         rotated = pygame.transform.rotate(self.image, self.rotation)
-        for offset in self.ghost_offsets():
+        for offset in self.ghost_offsets(self.bounding_radius()):
             center = self.position + offset
             screen.blit(rotated, rotated.get_rect(center=(round(center.x), round(center.y))))
+
+    def bounding_radius(self) -> float:
+        return self.radius * (1 + ASTEROID_SHAPE_AMPLITUDE)
+
+    def get_mask(self) -> pygame.Mask:
+        return pygame.mask.from_surface(pygame.transform.rotate(self.image, self.rotation))
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt

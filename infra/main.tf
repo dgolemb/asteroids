@@ -9,12 +9,6 @@ data "azurerm_user_assigned_identity" "acr_pull" {
   resource_group_name = data.azurerm_resource_group.main.name
 }
 
-resource "random_string" "suffix" {
-  length  = 6
-  special = false
-  upper   = false
-}
-
 resource "azurerm_service_plan" "main" {
   name                = "asp-${var.project_name}"
   resource_group_name = data.azurerm_resource_group.main.name
@@ -24,7 +18,7 @@ resource "azurerm_service_plan" "main" {
 }
 
 resource "azurerm_linux_web_app" "main" {
-  name                = "app-${var.project_name}-${random_string.suffix.result}"
+  name                = var.web_app_name
   resource_group_name = data.azurerm_resource_group.main.name
   location            = var.location
   service_plan_id     = azurerm_service_plan.main.id
