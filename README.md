@@ -31,7 +31,7 @@ Docker base images:
 Infrastructure and CI:
 
 - Terraform 1.15.6
-- Terraform provider hashicorp/azurerm 4.81.0
+- Terraform provider hashicorp/azurerm 5.15.0
 - GitHub Actions: actions/checkout v4, actions/setup-python v5, azure/login v2, docker/setup-buildx-action v3, docker/build-push-action v6, hashicorp/setup-terraform v3
 
 ## Running, testing and building
