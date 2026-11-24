@@ -2,7 +2,7 @@
 
 This repository contains the code of an Asteroids-style game, built on top of the guided project from boot.dev. The main goal of the project was to learn programming fundamentals, to build CI/CD pipelines, and to develop software following AI native workflow principles with Claude Code. The second goal was to end up with a playable, enjoyable and widely available game: it runs in a web browser, including on touch devices.
 
-The game is hosted at https://app-asteroids-e7f6wp.azurewebsites.net
+The game is hosted at https://app-asteroids-demo-dg.azurewebsites.net
 
 ## Dependencies
 
@@ -32,7 +32,6 @@ Infrastructure and CI:
 
 - Terraform 1.15.6
 - Terraform provider hashicorp/azurerm 4.81.0
-- Terraform provider hashicorp/random 3.9.1
 - GitHub Actions: actions/checkout v4, actions/setup-python v5, azure/login v2, docker/setup-buildx-action v3, docker/build-push-action v6, hashicorp/setup-terraform v3
 
 ## Running, testing and building
