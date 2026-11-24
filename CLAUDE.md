@@ -44,7 +44,6 @@ Do not add Co-Authored-By information to commits.
 
 ## Rules
 
-Use the venv.
 When you are not sure, ask questions instead of guessing.
 After every approved and completed Edit, commit to the current branch with a short (1-2 sentence) description of the changes made.
 After every commit, verify that the contents of README.md still match the actual state. If not, update the README.
