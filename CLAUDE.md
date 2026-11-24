@@ -1,8 +1,8 @@
-# Asteroids - projekt szkoleniowy
+# Asteroids - training project
 
 ## What this project is
 
-Projekt prostej gry w stylu Asteroids. Ma za zadanie nauke podstaw programowania oraz AI native workflow.
+A simple Asteroids-style game project. Its purpose is to teach programming fundamentals and an AI-native workflow.
 
 ## Stack and tools
 
@@ -11,11 +11,11 @@ Pygames 2.6.1
 uv 0.13.8
 pygbag 0.9.3
 
-Obrazy bazowe Docker:
+Docker base images:
 python:3.13-slim
 nginx:1.30-alpine
 
-Runtime w przeglądarce:
+Browser runtime:
 CPython 3.12
 pygame-ce 2.5.7
 
@@ -30,21 +30,20 @@ python -m unittest
 
 ## Code conventions
 
-Nazwy zmiennych w stylu snake_case
-Nazwy klas w stylu PascalCase
+Variable names in snake_case style
+Class names in PascalCase style
 
 ## Constraints (guardrails)
 
-Nie commituj prosto do main.
-Nie szukaj ani nie instaluj dodatkowych zaleznosci jesli wyraznie o to nie poprosze.
-Nie komentuj kodu jeśli o to nie poproszę.
-Nie uzywaj emoji.
-Nie pisz dokumentacji jesli nie zostaniesz o to bezposrednio poproszony.
-Nie dodawaj informacji Co-Authored-By do commitow.
+Do not commit directly to main.
+Do not search for or install additional dependencies unless I explicitly ask you to.
+Do not comment code unless I ask you to.
+Do not use emoji.
+Do not write documentation unless you are directly asked to.
+Do not add Co-Authored-By information to commits.
 
 ## Rules
 
-Korzystaj z venv.
-Gdy nie jesteś pewien, zadawaj pytania zamiast zgadywać.
-Po kazdym zatwierdzonym i wykonanym Edit, commituj do aktualnego brancha z krótkim (1-2 zdania) opisem wprowadzonych zmian.
-Po kazdym commit zweryfikuj, czy tresc pliku README.md nadal odpowiada stanowi faktycznemu. Jesli nie, zaktualizuj README
+When you are not sure, ask questions instead of guessing.
+After every approved and completed Edit, commit to the current branch with a short (1-2 sentence) description of the changes made.
+After every commit, verify that the contents of README.md still match the actual state. If not, update the README.
