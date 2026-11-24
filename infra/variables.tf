@@ -8,6 +8,11 @@ variable "project_name" {
   default = "asteroids"
 }
 
+variable "web_app_name" {
+  type    = string
+  default = "app-asteroids-demo-dg"
+}
+
 variable "resource_group_name" {
   type    = string
   default = "rg-AI-native-asteroids-training"
