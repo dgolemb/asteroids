@@ -40,7 +40,6 @@ Do not search for or install additional dependencies unless I explicitly ask you
 Do not comment code unless I ask you to.
 Do not use emoji.
 Do not write documentation unless you are directly asked to.
-Do not add Co-Authored-By information to commits.
 
 ## Rules
 
